@@ -1,6 +1,11 @@
 import Layout from "@/components/Layout";
 import ArieCalculator from "@/components/calculators/ArieCalculator";
 import VolumCalculator from "@/components/calculators/VolumCalculator";
+import EcuatieGrad2Calculator from "@/components/calculators/EcuatieGrad2Calculator";
+import TrigonometrieCalculator from "@/components/calculators/TrigonometrieCalculator";
+import MatriceCalculator from "@/components/calculators/MatriceCalculator";
+import PitagoraCalculator from "@/components/calculators/PitagoraCalculator";
+import StatisticaCalculator from "@/components/calculators/StatisticaCalculator";
 import { Calculator } from "lucide-react";
 
 const MatematicaPage = () => (
@@ -12,12 +17,17 @@ const MatematicaPage = () => (
         </div>
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Calculatoare Matematică</h1>
-          <p className="text-sm text-muted-foreground">Arii, volume, perimetre — cu vizualizări interactive</p>
+          <p className="text-sm text-muted-foreground">Arii, volume, ecuații, trigonometrie, matrice, statistică</p>
         </div>
       </div>
       <div className="space-y-8">
         <ArieCalculator />
         <VolumCalculator />
+        <EcuatieGrad2Calculator />
+        <TrigonometrieCalculator />
+        <PitagoraCalculator />
+        <MatriceCalculator />
+        <StatisticaCalculator />
       </div>
     </div>
   </Layout>

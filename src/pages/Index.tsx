@@ -10,7 +10,7 @@ const categories = [
     description: "Arii, volume, perimetre — cu forme vizuale interactive și calcule instant",
     icon: Calculator,
     gradient: "gradient-math",
-    count: "2 calculatoare",
+    count: "7 calculatoare",
   },
   {
     to: "/casa",
