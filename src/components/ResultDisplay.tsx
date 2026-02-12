@@ -5,11 +5,11 @@ interface ResultDisplayProps {
 }
 
 const ResultDisplay = ({ label, value, unit }: ResultDisplayProps) => (
-  <div className="rounded-lg bg-primary/5 border border-primary/10 p-4">
-    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-    <p className="mt-1 font-display text-2xl font-bold text-primary">
+  <div className="rounded-md bg-primary/5 border border-primary/10 px-3 py-2">
+    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="font-display text-base font-bold text-primary leading-tight">
       {value}
-      {unit && <span className="ml-1 text-base font-medium text-muted-foreground">{unit}</span>}
+      {unit && <span className="ml-1 text-[10px] font-medium text-muted-foreground">{unit}</span>}
     </p>
   </div>
 );
