@@ -114,7 +114,7 @@ const Viz3D = ({ calcId, params }: { calcId: string; params: Record<string, numb
   if (!type) return null;
 
   return (
-    <div className="w-full h-[150px] rounded-[4px] overflow-hidden bg-muted/30 border border-border/50 relative">
+    <div className="w-full h-[140px] rounded-[5px] overflow-hidden bg-muted/20 border border-border/30 relative">
       <Canvas camera={{ position: [3, 2.5, 3], fov: 38 }} gl={{ antialias: true, alpha: true }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={0.7} />
@@ -123,7 +123,7 @@ const Viz3D = ({ calcId, params }: { calcId: string; params: Record<string, numb
         <OrbitControls enablePan={false} minDistance={2} maxDistance={15} autoRotate autoRotateSpeed={1.5} />
         <gridHelper args={[8, 8, '#cbd5e1', '#e2e8f0']} position={[0, -1.8, 0]} />
       </Canvas>
-      <div className="absolute bottom-1 left-1 text-[8px] text-muted-foreground bg-card/80 px-1 rounded-[2px]">
+      <div className="absolute bottom-1 left-1 text-[8px] text-muted-foreground glass px-1 rounded-[3px]">
         drag: rotire • scroll: zoom
       </div>
     </div>
