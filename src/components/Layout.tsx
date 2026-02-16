@@ -8,20 +8,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-lg">
-        <div className="container mx-auto flex items-center justify-between px-3 py-2">
-          <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
-            <div className="flex h-7 w-7 items-center justify-center rounded-[4px] gradient-primary text-primary-foreground text-sm font-bold">
-              ∑
+      <header className="sticky top-0 z-50 glass-strong">
+        <div className="container mx-auto flex items-center justify-between px-3 py-1.5">
+          <Link to="/" className="flex items-center gap-1.5 font-display text-base font-bold text-foreground">
+            <div className="flex h-6 w-6 items-center justify-center rounded-[5px] gradient-primary text-primary-foreground text-xs font-bold">
+              π
             </div>
-            <span>Calc<span className="text-primary">Math</span></span>
+            <span className="text-sm">Calc<span className="text-primary">Math</span></span>
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-0.5 md:flex">
             <Link
               to="/"
-              className={`flex items-center gap-1.5 rounded-[4px] px-3 py-1.5 text-xs font-medium transition-all ${
-                location.pathname === '/' || location.pathname === '/matematica'
+              className={`rounded-[5px] px-2.5 py-1 text-[11px] font-medium transition-all ${
+                location.pathname === '/' || location.pathname.startsWith('/calculator')
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
@@ -30,36 +30,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </Link>
             <Link
               to="/admin"
-              className="flex items-center gap-1 rounded-[4px] px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-all"
+              className="rounded-[5px] px-1.5 py-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-all"
             >
               <Settings className="h-3 w-3" />
             </Link>
           </nav>
 
           <button
-            className="flex h-7 w-7 items-center justify-center rounded-[4px] text-foreground hover:bg-secondary md:hidden"
+            className="flex h-6 w-6 items-center justify-center rounded-[5px] text-foreground hover:bg-secondary md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {menuOpen ? <X className="h-3.5 w-3.5" /> : <Menu className="h-3.5 w-3.5" />}
           </button>
         </div>
 
         {menuOpen && (
-          <div className="border-t border-border bg-card px-3 py-2 md:hidden">
+          <div className="border-t border-border/50 px-3 py-1.5 md:hidden glass">
             <Link
               to="/"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 rounded-[4px] px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="flex items-center rounded-[5px] px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
-              Calculatoare Matematică
+              Calculatoare
             </Link>
             <Link
               to="/admin"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 rounded-[4px] px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
-              <Settings className="h-3 w-3" />
-              Admin
+              <Settings className="h-3 w-3" /> Admin
             </Link>
           </div>
         )}
@@ -67,7 +66,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       <main>{children}</main>
 
-      <footer className="mt-8 border-t border-border bg-card py-4">
+      <footer className="mt-6 border-t border-border bg-card/50 py-3">
         <div className="container mx-auto px-3 text-center text-[10px] text-muted-foreground">
           <p>© 2026 CalcMath — Calculatoare matematică online gratuite pentru studenți</p>
         </div>
