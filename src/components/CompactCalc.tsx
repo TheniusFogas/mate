@@ -37,7 +37,7 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
       >
         <ChevronRight className={`h-2.5 w-2.5 text-muted-foreground shrink-0 transition-transform duration-150 ${open ? "rotate-90" : ""}`} />
         <div className="min-w-0 flex-1">
-          <span className="text-[12px] font-bold text-primary leading-tight block truncate">{calc.name}</span>
+          <span className="text-[11px] font-semibold text-foreground leading-tight block truncate">{calc.name}</span>
           <span className="text-[9px] text-muted-foreground/70 leading-tight block truncate">{calc.description}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
