@@ -66,7 +66,7 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
                   value={inputs[input.key]}
                   onChange={e => setInputs(prev => ({ ...prev, [input.key]: parseFloat(e.target.value) || 0 }))}
                   min={input.min} max={input.max} step={input.step || 1}
-                  className="w-full h-5 rounded-[4px] border border-input bg-background px-1 text-[10px] font-mono outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-colors"
+                  className="w-full h-5 rounded-[4px] border border-input bg-secondary/60 px-1 text-[10px] font-mono outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-colors [&::-webkit-inner-spin-button]:appearance-auto [&::-webkit-inner-spin-button]:opacity-100"
                 />
               </div>
             ))}
