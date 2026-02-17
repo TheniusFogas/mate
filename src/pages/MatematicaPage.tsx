@@ -91,8 +91,8 @@ const MatematicaPage = () => {
         <div className="space-y-3">
           {filtered.map((cat, catIdx) => (
             <section key={cat.id}>
-              <h2 className="text-[10px] font-semibold text-foreground mb-1 flex items-center gap-1 uppercase tracking-wider">
-                <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+              <h2 className="text-xs font-bold text-primary mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
+                <span className="h-2 w-2 rounded-full shrink-0 shadow-[0_0_6px_currentColor]" style={{ backgroundColor: cat.color }} />
                 {cat.name}
                 <span className="text-muted-foreground font-normal normal-case tracking-normal text-[9px]">— {cat.description}</span>
               </h2>
