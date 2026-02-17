@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Calculator } from "lucide-react";
+import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import CompactCalc from "@/components/CompactCalc";
 import { mathCategories } from "@/lib/mathCalcs";
@@ -38,9 +38,6 @@ const MatematicaPage = () => {
         {/* Hero - ultra compact */}
         <header className="mb-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-[5px] gradient-primary text-primary-foreground">
-              <Calculator className="h-3 w-3" />
-            </div>
             <div>
               <h1 className="font-display text-sm font-bold text-foreground leading-none">Calculatoare Matematică</h1>
               <p className="text-[9px] text-muted-foreground">{totalCalcs} instrumente • vizualizări interactive • formule detaliate</p>

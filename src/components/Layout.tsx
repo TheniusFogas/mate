@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Settings } from "lucide-react";
 import { useState } from "react";
+import mathLogo from "@/assets/math-logo.png";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -8,13 +9,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 glass-strong">
+      <header className="sticky top-0 z-50 glass-strong border-b border-border/50">
         <div className="container mx-auto flex items-center justify-between px-3 py-1.5">
           <Link to="/" className="flex items-center gap-1.5 font-display text-base font-bold text-foreground">
-            <div className="flex h-6 w-6 items-center justify-center rounded-[5px] gradient-primary text-primary-foreground text-xs font-bold">
-              π
-            </div>
-            <span className="text-sm">Calc<span className="text-primary">Math</span></span>
+            <img src={mathLogo} alt="MathLab" className="h-6 w-6 rounded-[5px]" />
+            <span className="text-sm">Math<span className="text-primary">Lab</span></span>
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex">
@@ -68,7 +67,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       <footer className="mt-6 border-t border-border bg-card/50 py-3">
         <div className="container mx-auto px-3 text-center text-[10px] text-muted-foreground">
-          <p>© 2026 CalcMath — Calculatoare matematică online gratuite pentru studenți</p>
+          <p>© 2026 MathLab — Calculatoare matematică online gratuite</p>
         </div>
       </footer>
     </div>
