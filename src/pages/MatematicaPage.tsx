@@ -57,11 +57,11 @@ const MatematicaPage = () => {
           />
         </div>
 
-        {/* Category pills - scrollable on mobile */}
-        <div className="flex gap-1 mb-2 overflow-x-auto pb-1 scrollbar-none">
+        {/* Category pills - wrap on 2 rows */}
+        <div className="flex flex-wrap gap-1 mb-2">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`shrink-0 px-2 py-0.5 rounded-[5px] text-[9px] font-medium transition-colors ${
+            className={`px-2 py-0.5 rounded-[5px] text-[9px] font-medium transition-colors ${
               !activeCategory ? "gradient-primary text-primary-foreground" : "glass text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -71,7 +71,7 @@ const MatematicaPage = () => {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-              className={`shrink-0 px-2 py-0.5 rounded-[5px] text-[9px] font-medium transition-colors flex items-center gap-1 ${
+              className={`px-2 py-0.5 rounded-[5px] text-[9px] font-medium transition-colors flex items-center gap-1 ${
                 activeCategory === cat.id ? "gradient-primary text-primary-foreground" : "glass text-muted-foreground hover:text-foreground"
               }`}
             >
