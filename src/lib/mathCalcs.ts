@@ -447,6 +447,43 @@ export const mathCategories: CalcCategory[] = [
           ];
         },
       },
+      {
+        id: "ec_biquadratica", name: "Ecuație Biquadratică", description: "ax⁴ + bx² + c = 0",
+        formula: "Se substituie t=x² → at²+bt+c=0",
+        explanation: "Ecuația biquadratică ax⁴+bx²+c=0 se rezolvă prin substituția t=x². Se obține ecuația de grad 2: at²+bt+c=0. Soluțiile t₁,t₂ dau x=±√t (doar dacă t≥0). Poate avea 0, 2 sau 4 soluții reale. Se aplică în fizică (oscilații neliniare), optică, mecanică.",
+        inputs: [{ key: "a", label: "a", default: 1 }, { key: "b", label: "b", default: -5 }, { key: "c", label: "c", default: 4 }],
+        calculate: (v) => {
+          if (!v.a) return [{ label: "Eroare", value: "a ≠ 0" }];
+          const d = v.b ** 2 - 4 * v.a * v.c;
+          if (d < 0) return [{ label: "Δ", value: fmt(d) + " < 0" }, { label: "Soluții reale", value: "0" }];
+          const t1 = (-v.b + Math.sqrt(d)) / (2 * v.a), t2 = (-v.b - Math.sqrt(d)) / (2 * v.a);
+          const sols: string[] = [];
+          if (t1 >= 0) { sols.push(`±${fmt(Math.sqrt(t1))}`); }
+          if (t2 >= 0 && Math.abs(t2 - t1) > 1e-10) { sols.push(`±${fmt(Math.sqrt(t2))}`); }
+          return [
+            { label: "Δ", value: fmt(d) },
+            { label: "t₁", value: fmt(t1) }, { label: "t₂", value: fmt(t2) },
+            { label: "Soluții x", value: sols.length ? sols.join(", ") : "∅ (t<0)" },
+          ];
+        },
+      },
+      {
+        id: "ec_irationala", name: "Ecuație Irațională", description: "√(ax+b) = c",
+        formula: "√(ax+b) = c → ax+b = c² (c≥0)",
+        explanation: "Se ridică ambii membri la pătrat: ax+b=c². Condiții: c≥0 și ax+b≥0. Se verifică obligatoriu soluția în ecuația inițială (pot apărea soluții false). Se aplică în fizică (cinematică), geometrie (distanțe), optimizare.",
+        inputs: [{ key: "a", label: "a", default: 2 }, { key: "b", label: "b", default: 3 }, { key: "c", label: "c", default: 3 }],
+        calculate: (v) => {
+          if (v.c < 0) return [{ label: "Soluție", value: "∅ (c < 0)" }];
+          if (!v.a) return [{ label: "Soluție", value: Math.sqrt(v.b) === v.c ? "∀x" : "∅" }];
+          const x = (v.c ** 2 - v.b) / v.a;
+          const check = v.a * x + v.b;
+          const valid = check >= 0 && Math.abs(Math.sqrt(check) - v.c) < 1e-9;
+          return [
+            { label: "x candidat", value: fmt(x) },
+            { label: "Verificare", value: valid ? "✓ Valid" : "✗ Soluție falsă" },
+          ];
+        },
+      },
     ],
   },
 
@@ -609,6 +646,55 @@ export const mathCategories: CalcCategory[] = [
           return [
             { label: "c", value: fmt(c) },
             { label: "Arie", value: fmt(0.5 * v.a * v.b * Math.sin(Cr)) },
+          ];
+        },
+      },
+      {
+        id: "vectori_2d", name: "Vectori 2D", description: "Produs scalar, unghi, normă, proiecție",
+        formula: "a·b = ax·bx + ay·by; |a| = √(ax²+ay²)",
+        explanation: "Vectorii 2D au componentele (x,y). Norma (lungimea): |v|=√(x²+y²). Produsul scalar: a·b=ax·bx+ay·by=|a||b|cos(θ). Vectori perpendiculari: a·b=0. Proiecția lui a pe b: proj=(a·b/|b|²)·b. Vectorul unitate: v/|v|. Se aplică în fizică (forțe, viteze), grafică, navigație, mecanică.",
+        inputs: [{ key: "ax", label: "aₓ", default: 3 }, { key: "ay", label: "aᵧ", default: 4 }, { key: "bx", label: "bₓ", default: -1 }, { key: "by", label: "bᵧ", default: 2 }],
+        calculate: (v) => {
+          const na = Math.sqrt(v.ax ** 2 + v.ay ** 2), nb = Math.sqrt(v.bx ** 2 + v.by ** 2);
+          const dot = v.ax * v.bx + v.ay * v.by;
+          const cross = v.ax * v.by - v.ay * v.bx;
+          const angle = na && nb ? Math.acos(Math.min(1, Math.max(-1, dot / (na * nb)))) * 180 / PI : 0;
+          return [
+            { label: "|a|", value: fmt(na) }, { label: "|b|", value: fmt(nb) },
+            { label: "a · b", value: fmt(dot) }, { label: "a × b (z)", value: fmt(cross) },
+            { label: "Unghi (°)", value: fmt(angle) },
+            { label: "Proiecție a→b", value: nb ? fmt(dot / nb) : "—" },
+          ];
+        },
+      },
+      {
+        id: "dist_punct_dreapta", name: "Distanța Punct-Dreaptă", description: "d = |ax₀+by₀+c|/√(a²+b²)",
+        formula: "d = |a·x₀ + b·y₀ + c| / √(a² + b²)",
+        explanation: "Distanța de la punctul P(x₀,y₀) la dreapta ax+by+c=0. Formula derivă din proiecția ortogonală. Dreaptă orizontală (b=0): d=|ax₀+c|/|a|. Dreaptă verticală (a=0): d=|by₀+c|/|b|. Se aplică la determinarea înălțimii triunghiului, distanța până la drum/linie de cale ferată, probleme de optimizare geometrică.",
+        inputs: [{ key: "a", label: "a", default: 3 }, { key: "b", label: "b", default: -4 }, { key: "c", label: "c", default: 5 }, { key: "x0", label: "x₀", default: 1 }, { key: "y0", label: "y₀", default: 2 }],
+        calculate: (v) => {
+          const d = Math.sqrt(v.a ** 2 + v.b ** 2);
+          return [
+            { label: "Distanța", value: d ? fmt(Math.abs(v.a * v.x0 + v.b * v.y0 + v.c) / d) : "—" },
+            { label: "Dreapta", value: `${fmt(v.a)}x + ${fmt(v.b)}y + ${fmt(v.c)} = 0` },
+          ];
+        },
+      },
+      {
+        id: "poligon_reg", name: "Poligon Regulat (n laturi)", description: "Arie, perimetru, unghi interior",
+        formula: "A = (n·a²)/(4·tan(π/n)); P = n·a",
+        explanation: "Poligonul regulat cu n laturi egale de lungime a. Arie = na²/(4tan(π/n)). Unghi interior = (n-2)·180°/n. Unghi exterior = 360°/n. Apotema = a/(2tan(π/n)). Raza circumscrisă R = a/(2sin(π/n)). Diagonale = n(n-3)/2. Se aplică în design, arhitectură, jocuri, cristalografie. Limita n→∞: poligonul devine cerc.",
+        inputs: [{ key: "n", label: "Nr. laturi", default: 7, min: 3, max: 100 }, { key: "a", label: "Latura", default: 5 }],
+        calculate: (v) => {
+          const n = Math.max(3, Math.round(v.n));
+          const area = n * v.a ** 2 / (4 * Math.tan(PI / n));
+          const apothem = v.a / (2 * Math.tan(PI / n));
+          const R = v.a / (2 * Math.sin(PI / n));
+          return [
+            { label: "Arie", value: fmt(area) }, { label: "Perimetru", value: fmt(n * v.a) },
+            { label: "Apotema", value: fmt(apothem) }, { label: "R circumscris", value: fmt(R) },
+            { label: "Unghi int.", value: fmt((n - 2) * 180 / n) + "°" },
+            { label: "Diagonale", value: fmt(n * (n - 3) / 2) },
           ];
         },
       },
@@ -1081,10 +1167,38 @@ export const mathCategories: CalcCategory[] = [
           ];
         },
       },
+      {
+        id: "distributie_poisson", name: "Distribuția Poisson", description: "P(X=k) = λᵏe⁻λ/k!",
+        formula: "P(X=k) = λᵏ·e⁻λ/k!",
+        explanation: "Distribuția Poisson modelează nr. de evenimente rare într-un interval fix (timp, spațiu). Parametrul λ = media = variația. Exemple: apeluri/oră, defecte/m², accidente/lună. Suma a două Poisson independente: λ₁+λ₂. Aproximare Binomială: dacă n mare și p mic, B(n,p)≈Poisson(np). Se aplică în telecomunicații, asigurări, controlul calității.",
+        inputs: [{ key: "lambda", label: "λ (media)", default: 3, min: 0.1, step: 0.1 }, { key: "k", label: "k", default: 2, min: 0 }],
+        calculate: (v) => {
+          const k = Math.round(v.k), lam = v.lambda;
+          const prob = Math.pow(lam, k) * Math.exp(-lam) / factorial(k);
+          let cumul = 0;
+          for (let i = 0; i <= k; i++) cumul += Math.pow(lam, i) * Math.exp(-lam) / factorial(i);
+          return [
+            { label: "P(X=k)", value: fmt(prob) },
+            { label: "P(X≤k)", value: fmt(cumul) },
+            { label: "E(X)=λ", value: fmt(lam) },
+            { label: "σ(X)", value: fmt(Math.sqrt(lam)) },
+          ];
+        },
+      },
+      {
+        id: "principiu_numarare", name: "Principii de Numărare", description: "Regula produsului & sumei",
+        formula: "Produs: n₁·n₂·...·nₖ | Sumă: n₁+n₂+...+nₖ",
+        explanation: "Regula produsului: dacă alegerea 1 se face în n₁ moduri ȘI alegerea 2 în n₂ moduri, totalul = n₁·n₂. Regula sumei: dacă SAU, totalul = n₁+n₂ (dacă sunt disjuncte). Se aplică la: numere formate cu cifre, meniuri restaurant, coduri, parole. Principiul sertarelor (Dirichlet): n+1 obiecte în n sertare → minim 2 în același sertar.",
+        inputs: [{ key: "n1", label: "n₁", default: 3 }, { key: "n2", label: "n₂", default: 4 }, { key: "n3", label: "n₃", default: 5 }],
+        calculate: (v) => [
+          { label: "Produs", value: fmt(v.n1 * v.n2 * v.n3) },
+          { label: "Sumă", value: fmt(v.n1 + v.n2 + v.n3) },
+        ],
+      },
     ],
   },
 
-  // ═══ MATRICE ═══
+
   {
     id: "matrice", name: "Matrice", description: "Operații cu matrice 2×2: det, inversă, transpusă",
     color: "hsl(200,60%,50%)",
@@ -1237,6 +1351,39 @@ export const mathCategories: CalcCategory[] = [
             { label: "φ", value: fmt(phi) }, { label: "1/φ", value: fmt(1 / phi) },
             { label: `φ^${fmt(v.n)}`, value: fmt(Math.pow(phi, v.n)) },
             { label: "φ²-φ-1", value: fmt(phi ** 2 - phi - 1) },
+          ];
+        },
+      },
+      {
+        id: "catalan", name: "Numerele lui Catalan", description: "C(n) = C(2n,n)/(n+1)",
+        formula: "Cₙ = (2n)!/[(n+1)!·n!]",
+        explanation: "Numerele Catalan: 1,1,2,5,14,42,132... Numără: parantezări corecte, arbori binari, triangulări de poligoane, drumuri monotone sub diagonală. C(n) = C(2n,n)/(n+1). Relația de recurență: C(n+1) = Σ C(i)·C(n-i). Cresc exponential: C(n) ~ 4ⁿ/(n√(πn)). Se aplică în informatică (arbori, parsare), combinatorică enumerativă.",
+        inputs: [{ key: "n", label: "n", default: 5, min: 0, max: 15 }],
+        calculate: (v) => {
+          const n = Math.round(Math.max(0, Math.min(15, v.n)));
+          const cat = factorial(2 * n) / (factorial(n + 1) * factorial(n));
+          const cats: number[] = [];
+          for (let i = 0; i <= Math.min(n, 10); i++) cats.push(factorial(2 * i) / (factorial(i + 1) * factorial(i)));
+          return [
+            { label: `C(${n})`, value: fmt(cat) },
+            { label: "Primii termeni", value: cats.join(", ") },
+          ];
+        },
+      },
+      {
+        id: "ecuatii_diofantine", name: "Ecuații Diofantine", description: "ax + by = c (soluții întregi)",
+        formula: "ax + by = c are soluții ⟺ gcd(a,b) | c",
+        explanation: "Ecuația diofantină liniară ax+by=c are soluții întregi doar dacă gcd(a,b) divide c. Soluția generală: x=x₀+(b/d)t, y=y₀-(a/d)t, t∈ℤ. Se găsește soluția particulară prin algoritmul extins al lui Euclid. Se aplică la probleme de monede (câte monede de valori a,b pentru totalul c), criptografie, teoria codurilor.",
+        inputs: [{ key: "a", label: "a", default: 3 }, { key: "b", label: "b", default: 5 }, { key: "c", label: "c", default: 1 }],
+        calculate: (v) => {
+          const a = Math.round(v.a), b = Math.round(v.b), c = Math.round(v.c);
+          const d = gcd(Math.abs(a), Math.abs(b));
+          if (!d) return [{ label: "Eroare", value: "a,b ≠ 0" }];
+          const hasS = c % d === 0;
+          return [
+            { label: "gcd(a,b)", value: fmt(d) },
+            { label: "Are soluții?", value: hasS ? "DA ✓" : "NU ✗" },
+            { label: "Condiție", value: `${d} | ${c} → ${hasS ? "adevărat" : "fals"}` },
           ];
         },
       },
