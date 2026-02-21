@@ -153,3 +153,17 @@
     border: 1px solid hsl(var(--glass-border));
   }
 }
+
+/* Number input spinner styling */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: inner-spin-button;
+  opacity: 1;
+  background: hsl(215 25% 27%);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

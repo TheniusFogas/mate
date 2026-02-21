@@ -9,9 +9,10 @@ const VIZ_3D = new Set([
 const VIZ_2D = new Set([
   // Geometry
   'triunghi', 'dreptunghi', 'cerc', 'trapez', 'paralelogram', 'romb', 'poligon_reg',
+  'vectori_2d', 'dist_punct_dreapta',
   // Algebra - graphs
   'ec_grad1', 'ec_grad2', 'ec_grad3', 'inecuatie_g1', 'inecuatie_g2',
-  'polinom_eval', 'valoare_abs', 'ec_exponentiala',
+  'polinom_eval', 'valoare_abs', 'ec_exponentiala', 'ec_biquadratica', 'ec_irationala',
   'progresie_a', 'progresie_g', 'dobanda_compusa',
   // Trigonometry
   'functii_trig', 'grade_rad', 'formule_adunare', 'formule_duplicare',
@@ -20,12 +21,12 @@ const VIZ_2D = new Set([
   'derivata_xn', 'integrala_xn', 'ec_tangentei', 'limita',
   'arie_curba', 'rata_variatie', 'monotonie', 'serie_taylor',
   // Statistics
-  'varianta_dev', 'regresie', 'mediana_mod', 'distributie_binomiala',
+  'varianta_dev', 'regresie', 'mediana_mod', 'distributie_binomiala', 'distributie_poisson',
   // Arithmetic
   'procente', 'fractii', 'puteri', 'factorizare',
   'medii', 'operatii_baza', 'suma_cifre',
   // Number theory
-  'fibonacci', 'conv_baze', 'nr_aur',
+  'fibonacci', 'conv_baze', 'nr_aur', 'catalan',
   // Combinatorics
   'permutari', 'aranjamente', 'combinari', 'binom_newton', 'probabilitate',
   // Matrices
