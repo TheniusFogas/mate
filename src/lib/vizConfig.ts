@@ -22,7 +22,7 @@ const VIZ_2D = new Set([
   'arie_curba', 'rata_variatie', 'monotonie', 'serie_taylor',
   // Statistics
   'varianta_dev', 'regresie', 'mediana_mod', 'distributie_binomiala', 'distributie_poisson',
-  'distributie_normala', 'test_t',
+  'distributie_normala', 'test_t', 'chi_patrat',
   // Arithmetic
   'procente', 'fractii', 'puteri', 'factorizare',
   'medii', 'operatii_baza', 'suma_cifre',
@@ -38,6 +38,7 @@ const VIZ_2D = new Set([
   'distanta_2p', 'ec_dreapta', 'ec_cerc',
   // Numerical methods
   'newton_raphson', 'interpolation', 'euler_ode', 'trapez_integrare',
+  'lagrange', 'nr_complexe',
 ]);
 
 export const getVizType = (id: string): VizType => {

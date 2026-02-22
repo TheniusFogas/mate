@@ -353,13 +353,25 @@ export const mathCategories: CalcCategory[] = [
         formula: "(a+bi)·(c+di) = (ac-bd) + (ad+bc)i",
         explanation: "Numerele complexe z=a+bi, unde i²=-1. Modulul |z|=√(a²+b²). Argumentul arg(z)=arctan(b/a). Conjugatul z̄=a-bi. Forma trigonometrică: z=r(cosθ+i·sinθ). Formula lui Euler: e^(iθ)=cosθ+i·sinθ. Modulul produsului = produsul modulelor. Argumentul produsului = suma argumentelor. Se folosesc în electrotehnica (curent alternativ), mecanica cuantică, procesarea semnalelor.",
         inputs: [{ key: "a", label: "a", default: 3 }, { key: "b", label: "b (·i)", default: 4 }, { key: "c", label: "c", default: 1 }, { key: "d", label: "d (·i)", default: -2 }],
-        calculate: (v) => [
-          { label: "z₁ + z₂", value: `${fmt(v.a + v.c)} + ${fmt(v.b + v.d)}i` },
-          { label: "z₁ × z₂", value: `${fmt(v.a * v.c - v.b * v.d)} + ${fmt(v.a * v.d + v.b * v.c)}i` },
-          { label: "|z₁|", value: fmt(Math.sqrt(v.a ** 2 + v.b ** 2)) },
-          { label: "arg(z₁) °", value: fmt(Math.atan2(v.b, v.a) * 180 / PI) },
-          { label: "|z₂|", value: fmt(Math.sqrt(v.c ** 2 + v.d ** 2)) },
-        ],
+        calculate: (v) => {
+          const r1 = Math.sqrt(v.a ** 2 + v.b ** 2);
+          const r2 = Math.sqrt(v.c ** 2 + v.d ** 2);
+          const th1 = Math.atan2(v.b, v.a) * 180 / PI;
+          const th2 = Math.atan2(v.d, v.c) * 180 / PI;
+          // Division: (a+bi)/(c+di) = ((ac+bd) + (bc-ad)i) / (c²+d²)
+          const den = v.c ** 2 + v.d ** 2;
+          return [
+            { label: "z₁ + z₂", value: `${fmt(v.a + v.c)} + ${fmt(v.b + v.d)}i` },
+            { label: "z₁ × z₂", value: `${fmt(v.a * v.c - v.b * v.d)} + ${fmt(v.a * v.d + v.b * v.c)}i` },
+            { label: "z₁ / z₂", value: den ? `${fmt((v.a * v.c + v.b * v.d) / den)} + ${fmt((v.b * v.c - v.a * v.d) / den)}i` : "—" },
+            { label: "|z₁|", value: fmt(r1) },
+            { label: "arg(z₁)", value: fmt(th1) + "°" },
+            { label: "Trig z₁", value: `${fmt(r1)}(cos${fmt(th1)}° + i·sin${fmt(th1)}°)` },
+            { label: "|z₂|", value: fmt(r2) },
+            { label: "arg(z₂)", value: fmt(th2) + "°" },
+            { label: "z̄₁ (conjugat)", value: `${fmt(v.a)} - ${fmt(v.b)}i` },
+          ];
+        },
       },
       {
         id: "inecuatie_g1", name: "Inecuație Grad 1", description: "ax + b > 0",
@@ -1509,10 +1521,31 @@ export const mathCategories: CalcCategory[] = [
           ];
         },
       },
+      {
+        id: "chi_patrat", name: "Test Chi-Pătrat (χ²)", description: "Test de independență / potrivire",
+        formula: "χ² = Σ(Oᵢ - Eᵢ)² / Eᵢ",
+        explanation: "Testul χ² compară frecvențele observate cu cele așteptate. χ² mare → diferență semnificativă. Grade de libertate df = k-1 (potrivire) sau (r-1)(c-1) (independență). Valori critice: χ²>3.84 (df=1, α=0.05), χ²>5.99 (df=2), χ²>7.81 (df=3). Se aplică în sociologie, genetică, marketing, controlul calității. Condiție: frecvențele așteptate ≥ 5.",
+        inputs: [
+          { key: "o1", label: "Obs. 1", default: 30 }, { key: "e1", label: "Aștept. 1", default: 25 },
+          { key: "o2", label: "Obs. 2", default: 20 }, { key: "e2", label: "Aștept. 2", default: 25 },
+          { key: "o3", label: "Obs. 3", default: 50 }, { key: "e3", label: "Aștept. 3", default: 50 },
+        ],
+        calculate: (v) => {
+          const pairs = [[v.o1, v.e1], [v.o2, v.e2], [v.o3, v.e3]].filter(([, e]) => e > 0);
+          const chi2 = pairs.reduce((s, [o, e]) => s + (o - e) ** 2 / e, 0);
+          const df = pairs.length - 1;
+          const criticals: Record<number, number> = { 1: 3.841, 2: 5.991, 3: 7.815, 4: 9.488, 5: 11.07 };
+          const crit = criticals[df] || 3.841;
+          return [
+            { label: "χ²", value: fmt(chi2) },
+            { label: "df", value: fmt(df) },
+            { label: `Valoare critică (α=0.05)`, value: fmt(crit) },
+            { label: "Semnificativ?", value: chi2 > crit ? `DA (χ²>${fmt(crit)})` : `NU (χ²≤${fmt(crit)})` },
+          ];
+        },
+      },
     ],
   },
-
-  // ═══ METODE NUMERICE ═══
   {
     id: "metode_numerice", name: "Metode Numerice", description: "Aproximări, interpolare, ecuații diferențiale",
     color: "hsl(30,70%,50%)",
@@ -1596,6 +1629,43 @@ export const mathCategories: CalcCategory[] = [
     ],
   },
 
+  // ═══ INTERPOLARE AVANSATĂ ═══
+  {
+    id: "interpolare_av", name: "Interpolare Avansată", description: "Lagrange",
+    color: "hsl(280,60%,55%)",
+    calculators: [
+      {
+        id: "lagrange", name: "Interpolare Lagrange", description: "Polinom prin 3 puncte",
+        formula: "P(x) = Σ yᵢ · Πⱼ≠ᵢ (x-xⱼ)/(xᵢ-xⱼ)",
+        explanation: "Interpolarea Lagrange construiește polinomul unic de grad ≤ n-1 care trece prin n puncte date. Pentru 3 puncte: polinom de grad ≤ 2. Este exact (trece prin toate punctele). Dezavantaj: instabilitate numerică la multe puncte (fenomenul Runge). Se aplică în grafică, reconstrucția semnalelor, meteorologie.",
+        inputs: [
+          { key: "x1", label: "x₁", default: 0 }, { key: "y1", label: "y₁", default: 1 },
+          { key: "x2", label: "x₂", default: 1 }, { key: "y2", label: "y₂", default: 3 },
+          { key: "x3", label: "x₃", default: 2 }, { key: "y3", label: "y₃", default: 2 },
+          { key: "x", label: "x (evaluat)", default: 1.5 },
+        ],
+        calculate: (v) => {
+          const xs = [v.x1, v.x2, v.x3], ys = [v.y1, v.y2, v.y3];
+          let result = 0;
+          for (let i = 0; i < 3; i++) {
+            let li = 1;
+            for (let j = 0; j < 3; j++) {
+              if (i !== j) li *= (v.x - xs[j]) / (xs[i] - xs[j]);
+            }
+            result += ys[i] * li;
+          }
+          const d01 = xs[0] - xs[1], d02 = xs[0] - xs[2], d12 = xs[1] - xs[2];
+          const aa = ys[0] / (d01 * d02) - ys[1] / (d01 * d12) + ys[2] / (d02 * d12);
+          const bb = -ys[0] * (xs[1] + xs[2]) / (d01 * d02) + ys[1] * (xs[0] + xs[2]) / (d01 * d12) - ys[2] * (xs[0] + xs[1]) / (d02 * d12);
+          return [
+            { label: `P(${fmt(v.x)})`, value: fmt(result) },
+            { label: "Coef. a (x²)", value: fmt(aa) },
+            { label: "Coef. b (x)", value: fmt(bb) },
+          ];
+        },
+      },
+    ],
+  },
 
   {
     id: "conversii", name: "Conversii", description: "Temperatură, lungime, arie, volum, greutate",
