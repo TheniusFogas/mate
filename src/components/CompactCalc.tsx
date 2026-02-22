@@ -1,9 +1,10 @@
-import { useState, useMemo, lazy, Suspense } from "react";
-import { ChevronRight, BookOpen, Eye, ExternalLink } from "lucide-react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import { ChevronRight, BookOpen, Eye, ExternalLink, Download, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { CalcConfig } from "@/lib/calcTypes";
 import { getAdsForPosition, getReferralsForZone } from "@/lib/adminStore";
 import { getVizType } from "@/lib/vizConfig";
+import { isExamMode, subscribeExamMode, addToHistory, exportCalcPDF } from "@/lib/calcFeatures";
 
 const Viz3D = lazy(() => import("./Viz3D"));
 const Viz2D = lazy(() => import("./Viz2D"));
@@ -12,11 +13,14 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
   const [open, setOpen] = useState(false);
   const [showFormula, setShowFormula] = useState(false);
   const [showViz, setShowViz] = useState(false);
+  const [examModeOn, setExamModeOn] = useState(isExamMode);
   const [inputs, setInputs] = useState<Record<string, number>>(() => {
     const d: Record<string, number> = {};
     calc.inputs.forEach(i => (d[i.key] = i.default));
     return d;
   });
+
+  useEffect(() => { const unsub = subscribeExamMode(() => setExamModeOn(isExamMode())); return () => { unsub(); }; }, []);
 
   const results = useMemo(() => {
     try { return calc.calculate(inputs); }
@@ -28,6 +32,20 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
 
   const ads = useMemo(() => getAdsForPosition('calculator', calc.id), [calc.id]);
   const referrals = useMemo(() => getReferralsForZone(calc.id), [calc.id]);
+
+  const handleSaveHistory = () => {
+    addToHistory({ calcName: calc.name, calcId: calc.id, inputs, results });
+  };
+
+  const handleExportPDF = () => {
+    exportCalcPDF(
+      calc.name,
+      calc.formula,
+      calc.explanation,
+      calc.inputs.map(i => ({ label: i.label, value: inputs[i.key], unit: i.unit })),
+      results
+    );
+  };
 
   return (
     <div className="glass rounded-[5px] overflow-hidden shadow-card hover:shadow-card-hover transition-shadow">
@@ -82,6 +100,24 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
             ))}
           </div>
 
+          {/* Action buttons */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleSaveHistory}
+              className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80"
+              title="Salvează în istoric"
+            >
+              <Save className="h-2.5 w-2.5" /> Salvează
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80"
+              title="Export PDF"
+            >
+              <Download className="h-2.5 w-2.5" /> PDF
+            </button>
+          </div>
+
           {/* Viz */}
           {hasViz && (
             <>
@@ -100,20 +136,24 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
             </>
           )}
 
-          {/* Formula */}
-          <button
-            onClick={() => setShowFormula(!showFormula)}
-            className="flex items-center gap-1 text-[9px] text-primary hover:underline"
-          >
-            <BookOpen className="h-2.5 w-2.5" />
-            {showFormula ? "Ascunde" : "Formulă & explicație"}
-          </button>
+          {/* Formula - hidden in exam mode */}
+          {!examModeOn && (
+            <>
+              <button
+                onClick={() => setShowFormula(!showFormula)}
+                className="flex items-center gap-1 text-[9px] text-primary hover:underline"
+              >
+                <BookOpen className="h-2.5 w-2.5" />
+                {showFormula ? "Ascunde" : "Formulă & explicație"}
+              </button>
 
-          {showFormula && (
-            <div className="rounded-[4px] bg-secondary/40 p-1.5 space-y-0.5">
-              <p className="text-[9px] font-mono text-foreground leading-relaxed">{calc.formula}</p>
-              <p className="text-[9px] text-muted-foreground leading-relaxed">{calc.explanation}</p>
-            </div>
+              {showFormula && (
+                <div className="rounded-[4px] bg-secondary/40 p-1.5 space-y-0.5">
+                  <p className="text-[9px] font-mono text-foreground leading-relaxed">{calc.formula}</p>
+                  <p className="text-[9px] text-muted-foreground leading-relaxed">{calc.explanation}</p>
+                </div>
+              )}
+            </>
           )}
 
           {/* Ads */}
