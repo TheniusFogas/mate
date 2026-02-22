@@ -1469,10 +1469,134 @@ export const mathCategories: CalcCategory[] = [
           ];
         },
       },
+      {
+        id: "distributie_normala", name: "Distribuție Normală (Z)", description: "Valori z-score, probabilitate aproximativă",
+        formula: "z = (x - μ) / σ",
+        explanation: "Distribuția normală (Gauss) este simetrică în jurul mediei μ cu deviația σ. Z-score arată câte deviații standard e un punct față de medie. P(μ±1σ)≈68.27%, P(μ±2σ)≈95.45%, P(μ±3σ)≈99.73%. Se aplică în controlul calității, testare de ipoteze, intervalele de încredere. Teorema limitei centrale: suma multor variabile independente tinde la normală.",
+        inputs: [{ key: "x", label: "x", default: 75 }, { key: "mu", label: "Media (μ)", default: 70 }, { key: "sigma", label: "Dev. std (σ)", default: 10, min: 0.01 }],
+        calculate: (v) => {
+          const z = (v.x - v.mu) / v.sigma;
+          // Approximate CDF using error function approximation
+          const t = 1 / (1 + 0.2316419 * Math.abs(z));
+          const d = 0.3989422804 * Math.exp(-z * z / 2);
+          const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.8212560 + t * 1.3302744))));
+          const cdf = z > 0 ? 1 - p : p;
+          return [
+            { label: "z-score", value: fmt(z) },
+            { label: "P(X ≤ x)", value: fmt(cdf * 100) + "%" },
+            { label: "P(X > x)", value: fmt((1 - cdf) * 100) + "%" },
+            { label: "Interval ±1σ", value: `[${fmt(v.mu - v.sigma)}, ${fmt(v.mu + v.sigma)}]` },
+            { label: "Interval ±2σ", value: `[${fmt(v.mu - 2 * v.sigma)}, ${fmt(v.mu + 2 * v.sigma)}]` },
+          ];
+        },
+      },
+      {
+        id: "test_t", name: "Test t-Student", description: "Testul t pentru o medie",
+        formula: "t = (x̄ - μ₀) / (s/√n)",
+        explanation: "Testul t-Student verifică dacă media unui eșantion diferă semnificativ de o valoare presupusă μ₀. t = (x̄-μ₀)/(s/√n) unde s = deviația standard a eșantionului, n = dimensiunea. Grade de libertate df = n-1. La df mare, distribuția t se apropie de normală. Se aplică în cercetare medicală, psihologie, controlul calității. Valori critice: |t|>2 sugerează semnificație la α=0.05.",
+        inputs: [{ key: "xbar", label: "Media eșantion (x̄)", default: 52 }, { key: "mu", label: "μ₀ (ipoteza)", default: 50 }, { key: "s", label: "Dev. std (s)", default: 5, min: 0.01 }, { key: "n", label: "Dimensiune (n)", default: 30, min: 2 }],
+        calculate: (v) => {
+          const se = v.s / Math.sqrt(v.n);
+          const t = (v.xbar - v.mu) / se;
+          const df = v.n - 1;
+          const significant = Math.abs(t) > 2;
+          return [
+            { label: "t", value: fmt(t) },
+            { label: "df", value: fmt(df) },
+            { label: "Eroare std.", value: fmt(se) },
+            { label: "IC 95% aprox.", value: `[${fmt(v.xbar - 1.96 * se)}, ${fmt(v.xbar + 1.96 * se)}]` },
+            { label: "Semnificativ?", value: significant ? "DA (|t|>2)" : "NU (|t|≤2)" },
+          ];
+        },
+      },
     ],
   },
 
-  // ═══ CONVERSII ═══
+  // ═══ METODE NUMERICE ═══
+  {
+    id: "metode_numerice", name: "Metode Numerice", description: "Aproximări, interpolare, ecuații diferențiale",
+    color: "hsl(30,70%,50%)",
+    calculators: [
+      {
+        id: "newton_raphson", name: "Newton-Raphson", description: "Aproximare rădăcină f(x)=x²-a",
+        formula: "xₙ₊₁ = xₙ - f(xₙ)/f'(xₙ)",
+        explanation: "Metoda Newton-Raphson aproximează rădăcinile ecuației f(x)=0 iterativ. La fiecare pas, se coboară tangenta la grafic. Convergență pătratică (rapid) dacă x₀ e aproape de rădăcină. Poate eșua la puncte critice f'(x)=0 sau cu x₀ prost ales. Se aplică la calculul √a (f(x)=x²-a), optimizare, rețele neuronale (backpropagation). Este baza multor algoritmi numerici.",
+        inputs: [{ key: "a", label: "Calculează √a", default: 7, min: 0.01 }, { key: "x0", label: "x₀ (start)", default: 3 }, { key: "iter", label: "Iterații", default: 6, min: 1, max: 20 }],
+        calculate: (v) => {
+          let x = v.x0;
+          const steps: { label: string; value: string }[] = [];
+          for (let i = 1; i <= Math.min(v.iter, 20); i++) {
+            const fx = x * x - v.a;
+            const fpx = 2 * x;
+            if (Math.abs(fpx) < 1e-15) break;
+            x = x - fx / fpx;
+            steps.push({ label: `x${i}`, value: fmt(x, 10) });
+          }
+          steps.push({ label: "√a exact", value: fmt(Math.sqrt(v.a), 10) });
+          steps.push({ label: "Eroare", value: fmt(Math.abs(x - Math.sqrt(v.a)), 12) });
+          return steps;
+        },
+      },
+      {
+        id: "interpolation", name: "Interpolare Liniară", description: "Estimare între 2 puncte",
+        formula: "y = y₁ + (x-x₁)(y₂-y₁)/(x₂-x₁)",
+        explanation: "Interpolarea liniară estimează valoarea y pentru un x dat, între două puncte cunoscute (x₁,y₁) și (x₂,y₂). Formula: y = y₁ + (x-x₁)·(y₂-y₁)/(x₂-x₁). Este cea mai simplă formă de interpolare. Eroarea depinde de distanța dintre puncte și neliniaritatea funcției. Se aplică în grafică computerizată, senzori, tabele de date. Interpolarea quadratică necesită 3 puncte.",
+        inputs: [{ key: "x1", label: "x₁", default: 0 }, { key: "y1", label: "y₁", default: 0 }, { key: "x2", label: "x₂", default: 10 }, { key: "y2", label: "y₂", default: 100 }, { key: "x", label: "x (căutat)", default: 7 }],
+        calculate: (v) => {
+          if (v.x1 === v.x2) return [{ label: "Eroare", value: "x₁ ≠ x₂" }];
+          const y = v.y1 + (v.x - v.x1) * (v.y2 - v.y1) / (v.x2 - v.x1);
+          const t = (v.x - v.x1) / (v.x2 - v.x1);
+          return [
+            { label: "y interpolat", value: fmt(y) },
+            { label: "t (parametru)", value: fmt(t) },
+            { label: "Panta", value: fmt((v.y2 - v.y1) / (v.x2 - v.x1)) },
+          ];
+        },
+      },
+      {
+        id: "euler_ode", name: "Ecuație Diferențială (Euler)", description: "y' = f(x,y), metoda Euler",
+        formula: "yₙ₊₁ = yₙ + h·f(xₙ, yₙ)",
+        explanation: "Metoda lui Euler rezolvă numeric ecuații diferențiale y'=f(x,y) cu condiția inițială y(x₀)=y₀. La fiecare pas: yₙ₊₁=yₙ+h·f(xₙ,yₙ). Pasul h mic → mai precis dar mai lent. Eroarea per pas este O(h²), eroarea globală O(h). Metode mai bune: Runge-Kutta (RK4). Aplicăm pe y'=k·y (creștere/descreștere exponențială): soluția exactă y=y₀·e^(kx).",
+        inputs: [{ key: "y0", label: "y₀", default: 1 }, { key: "k", label: "k (y'=k·y)", default: 0.5, step: 0.1 }, { key: "xEnd", label: "x final", default: 2 }, { key: "steps", label: "Nr. pași", default: 10, min: 2, max: 100 }],
+        calculate: (v) => {
+          const h = v.xEnd / v.steps;
+          let y = v.y0;
+          for (let i = 0; i < v.steps; i++) {
+            y = y + h * v.k * y;
+          }
+          const exact = v.y0 * Math.exp(v.k * v.xEnd);
+          return [
+            { label: `y(${fmt(v.xEnd)}) Euler`, value: fmt(y) },
+            { label: `y(${fmt(v.xEnd)}) exact`, value: fmt(exact) },
+            { label: "Eroare relativă", value: fmt(Math.abs(y - exact) / Math.abs(exact) * 100) + "%" },
+            { label: "Pas h", value: fmt(h) },
+          ];
+        },
+      },
+      {
+        id: "trapez_integrare", name: "Integrare Numerică (Trapez)", description: "∫x² dx pe [a,b] cu metoda trapezului",
+        formula: "∫≈(h/2)[f(a)+2Σf(xᵢ)+f(b)]",
+        explanation: "Metoda trapezului aproximează integrala împărțind intervalul în n sub-intervale și aproximând aria cu trapeze. Eroarea: O(h²). Metoda Simpson (parabolă) este mai precisă: O(h⁴). Se aplică când funcția nu are primitivă elementară, în inginerie, fizică, procesarea semnalelor. Aplicăm pe f(x)=x² cu primitiva F(x)=x³/3.",
+        inputs: [{ key: "a", label: "a (start)", default: 0 }, { key: "b", label: "b (end)", default: 3 }, { key: "n", label: "Nr. trapeze", default: 10, min: 1, max: 1000 }],
+        calculate: (v) => {
+          const f = (x: number) => x * x;
+          const h = (v.b - v.a) / v.n;
+          let sum = f(v.a) + f(v.b);
+          for (let i = 1; i < v.n; i++) sum += 2 * f(v.a + i * h);
+          const trap = (h / 2) * sum;
+          const exact = (v.b ** 3 - v.a ** 3) / 3;
+          return [
+            { label: "∫ Trapez", value: fmt(trap) },
+            { label: "∫ Exact (x³/3)", value: fmt(exact) },
+            { label: "Eroare", value: fmt(Math.abs(trap - exact)) },
+            { label: "Eroare %", value: exact ? fmt(Math.abs(trap - exact) / Math.abs(exact) * 100) + "%" : "—" },
+          ];
+        },
+      },
+    ],
+  },
+
+
   {
     id: "conversii", name: "Conversii", description: "Temperatură, lungime, arie, volum, greutate",
     color: "hsl(0,60%,55%)",
