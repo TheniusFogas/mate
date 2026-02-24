@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from "react";
-import { ChevronRight, BookOpen, Eye, ExternalLink, Download, Save } from "lucide-react";
+import { ChevronRight, BookOpen, Eye, ExternalLink, Download, Save, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import type { CalcConfig } from "@/lib/calcTypes";
 import { getAdsForPosition, getReferralsForZone } from "@/lib/adminStore";
 import { getVizType } from "@/lib/vizConfig";
@@ -14,6 +15,7 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
   const [showFormula, setShowFormula] = useState(false);
   const [showViz, setShowViz] = useState(false);
   const [examModeOn, setExamModeOn] = useState(isExamMode);
+  const [copied, setCopied] = useState(false);
   const [inputs, setInputs] = useState<Record<string, number>>(() => {
     const d: Record<string, number> = {};
     calc.inputs.forEach(i => (d[i.key] = i.default));
@@ -39,12 +41,20 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
 
   const handleExportPDF = () => {
     exportCalcPDF(
-      calc.name,
-      calc.formula,
-      calc.explanation,
+      calc.name, calc.formula, calc.explanation,
       calc.inputs.map(i => ({ label: i.label, value: inputs[i.key], unit: i.unit })),
       results
     );
+  };
+
+  const handleShare = () => {
+    const params = new URLSearchParams();
+    Object.entries(inputs).forEach(([k, v]) => params.set(k, v.toString()));
+    const url = `${window.location.origin}/calculator/${calc.id}?${params.toString()}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -53,7 +63,13 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-left hover:bg-secondary/30 transition-colors"
       >
-        <ChevronRight className={`h-2.5 w-2.5 text-muted-foreground shrink-0 transition-transform duration-150 ${open ? "rotate-90" : ""}`} />
+        <motion.div
+          animate={{ rotate: open ? 90 : 0 }}
+          transition={{ duration: 0.15 }}
+          className="shrink-0"
+        >
+          <ChevronRight className="h-2.5 w-2.5 text-muted-foreground" />
+        </motion.div>
         <div className="min-w-0 flex-1">
           <span className="text-[11px] font-semibold text-foreground leading-tight block truncate">{calc.name}</span>
           <span className="text-[9px] text-muted-foreground/70 leading-tight block truncate">{calc.description}</span>
@@ -70,106 +86,114 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
         </div>
       </button>
 
-      {open && (
-        <div className="px-2 pb-2 space-y-1.5 border-t border-border/30">
-          {/* Inputs */}
-          <div className="grid grid-cols-2 gap-1 pt-1.5">
-            {calc.inputs.map(input => (
-              <div key={input.key}>
-                <label className="text-[8px] font-medium text-muted-foreground uppercase tracking-wider leading-none block mb-0.5">
-                  {input.label}{input.unit && ` (${input.unit})`}
-                </label>
-                <input
-                  type="number"
-                  value={inputs[input.key]}
-                  onChange={e => setInputs(prev => ({ ...prev, [input.key]: parseFloat(e.target.value) || 0 }))}
-                  min={input.min} max={input.max} step={input.step || 1}
-                  className="w-full h-5 rounded-[4px] border border-input bg-secondary/60 px-1 text-[10px] font-mono outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-colors [&::-webkit-inner-spin-button]:appearance-auto [&::-webkit-inner-spin-button]:opacity-100"
-                />
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="px-2 pb-2 space-y-1.5 border-t border-border/30">
+              {/* Inputs */}
+              <div className="grid grid-cols-2 gap-1 pt-1.5">
+                {calc.inputs.map(input => (
+                  <div key={input.key}>
+                    <label className="text-[8px] font-medium text-muted-foreground uppercase tracking-wider leading-none block mb-0.5">
+                      {input.label}{input.unit && ` (${input.unit})`}
+                    </label>
+                    <input
+                      type="number"
+                      value={inputs[input.key]}
+                      onChange={e => setInputs(prev => ({ ...prev, [input.key]: parseFloat(e.target.value) || 0 }))}
+                      min={input.min} max={input.max} step={input.step || 1}
+                      className="w-full h-5 rounded-[4px] border border-input bg-secondary/60 px-1 text-[10px] font-mono outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-colors [&::-webkit-inner-spin-button]:appearance-auto [&::-webkit-inner-spin-button]:opacity-100"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Results */}
-          <div className="rounded-[4px] bg-primary/5 border border-primary/10 p-1.5 space-y-0.5">
-            {results.map((r, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-1">
-                <span className="text-[9px] text-muted-foreground truncate">{r.label}</span>
-                <span className="text-[10px] font-mono font-semibold text-foreground whitespace-nowrap">{r.value}</span>
+              {/* Results */}
+              <motion.div
+                key={JSON.stringify(results)}
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: 1 }}
+                className="rounded-[4px] bg-primary/5 border border-primary/10 p-1.5 space-y-0.5"
+              >
+                {results.map((r, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-1">
+                    <span className="text-[9px] text-muted-foreground truncate">{r.label}</span>
+                    <span className="text-[10px] font-mono font-semibold text-foreground whitespace-nowrap">{r.value}</span>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1">
+                <button onClick={handleSaveHistory} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Salvează în istoric">
+                  <Save className="h-2.5 w-2.5" /> Salvează
+                </button>
+                <button onClick={handleExportPDF} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Export PDF">
+                  <Download className="h-2.5 w-2.5" /> PDF
+                </button>
+                <button onClick={handleShare} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Copiază link cu parametri">
+                  <Share2 className="h-2.5 w-2.5" /> {copied ? "Copiat!" : "Link"}
+                </button>
               </div>
-            ))}
-          </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleSaveHistory}
-              className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80"
-              title="Salvează în istoric"
-            >
-              <Save className="h-2.5 w-2.5" /> Salvează
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80"
-              title="Export PDF"
-            >
-              <Download className="h-2.5 w-2.5" /> PDF
-            </button>
-          </div>
-
-          {/* Viz */}
-          {hasViz && (
-            <>
-              <button
-                onClick={() => setShowViz(!showViz)}
-                className="flex items-center gap-1 text-[9px] text-primary hover:underline font-medium"
-              >
-                <Eye className="h-2.5 w-2.5" />
-                {showViz ? "Ascunde" : `Vizualizare ${vizType === '3d' ? '3D' : '2D'}`}
-              </button>
-              {showViz && (
-                <Suspense fallback={<div className="h-[100px] bg-muted/20 rounded-[4px] animate-pulse" />}>
-                  {vizType === '3d' ? <Viz3D calcId={calc.id} params={inputs} /> : <Viz2D calcId={calc.id} params={inputs} />}
-                </Suspense>
+              {/* Viz */}
+              {hasViz && (
+                <>
+                  <button onClick={() => setShowViz(!showViz)} className="flex items-center gap-1 text-[9px] text-primary hover:underline font-medium">
+                    <Eye className="h-2.5 w-2.5" />
+                    {showViz ? "Ascunde" : `Vizualizare ${vizType === '3d' ? '3D' : '2D'}`}
+                  </button>
+                  <AnimatePresence>
+                    {showViz && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                        <Suspense fallback={<div className="h-[100px] bg-muted/20 rounded-[4px] animate-pulse" />}>
+                          {vizType === '3d' ? <Viz3D calcId={calc.id} params={inputs} /> : <Viz2D calcId={calc.id} params={inputs} />}
+                        </Suspense>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
               )}
-            </>
-          )}
 
-          {/* Formula - hidden in exam mode */}
-          {!examModeOn && (
-            <>
-              <button
-                onClick={() => setShowFormula(!showFormula)}
-                className="flex items-center gap-1 text-[9px] text-primary hover:underline"
-              >
-                <BookOpen className="h-2.5 w-2.5" />
-                {showFormula ? "Ascunde" : "Formulă & explicație"}
-              </button>
-
-              {showFormula && (
-                <div className="rounded-[4px] bg-secondary/40 p-1.5 space-y-0.5">
-                  <p className="text-[9px] font-mono text-foreground leading-relaxed">{calc.formula}</p>
-                  <p className="text-[9px] text-muted-foreground leading-relaxed">{calc.explanation}</p>
-                </div>
+              {/* Formula - hidden in exam mode */}
+              {!examModeOn && (
+                <>
+                  <button onClick={() => setShowFormula(!showFormula)} className="flex items-center gap-1 text-[9px] text-primary hover:underline">
+                    <BookOpen className="h-2.5 w-2.5" />
+                    {showFormula ? "Ascunde" : "Formulă & explicație"}
+                  </button>
+                  <AnimatePresence>
+                    {showFormula && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                        <div className="rounded-[4px] bg-secondary/40 p-1.5 space-y-0.5">
+                          <p className="text-[9px] font-mono text-foreground leading-relaxed">{calc.formula}</p>
+                          <p className="text-[9px] text-muted-foreground leading-relaxed">{calc.explanation}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
               )}
-            </>
-          )}
 
-          {/* Ads */}
-          {ads.map(ad => (
-            <div key={ad.id} className="text-[9px]" dangerouslySetInnerHTML={{ __html: ad.code }} />
-          ))}
-
-          {/* Referrals */}
-          {referrals.map(ref => (
-            <a key={ref.id} href={ref.url} target="_blank" rel="noopener noreferrer sponsored"
-              className="block text-[9px] text-primary hover:underline truncate">
-              {ref.label}
-            </a>
-          ))}
-        </div>
-      )}
+              {/* Ads */}
+              {ads.map(ad => (
+                <div key={ad.id} className="text-[9px]" dangerouslySetInnerHTML={{ __html: ad.code }} />
+              ))}
+              {referrals.map(ref => (
+                <a key={ref.id} href={ref.url} target="_blank" rel="noopener noreferrer sponsored" className="block text-[9px] text-primary hover:underline truncate">
+                  {ref.label}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
