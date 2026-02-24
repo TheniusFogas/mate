@@ -1,6 +1,6 @@
 import { useMemo, useState, lazy, Suspense } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ChevronRight, BookOpen, Eye, Home } from "lucide-react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import { ChevronRight, BookOpen, Eye, Home, Share2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { mathCategories } from "@/lib/mathCalcs";
 import { getVizType } from "@/lib/vizConfig";
@@ -80,10 +80,15 @@ const SEOHead = ({ calc, category }: { calc: CalcConfig; category: CalcCategory 
 };
 
 const FullCalculator = ({ calc }: { calc: CalcConfig }) => {
+  const [searchParams] = useSearchParams();
   const [showViz, setShowViz] = useState(true);
+  const [copied, setCopied] = useState(false);
   const [inputs, setInputs] = useState<Record<string, number>>(() => {
     const d: Record<string, number> = {};
-    calc.inputs.forEach(i => (d[i.key] = i.default));
+    calc.inputs.forEach(i => {
+      const fromUrl = searchParams.get(i.key);
+      d[i.key] = fromUrl ? parseFloat(fromUrl) || i.default : i.default;
+    });
     return d;
   });
 
@@ -99,9 +104,23 @@ const FullCalculator = ({ calc }: { calc: CalcConfig }) => {
   return (
     <article className="space-y-2">
       {/* Title */}
-      <header>
-        <h1 className="font-display text-base font-bold text-foreground leading-tight">{calc.name}</h1>
-        <p className="text-[11px] text-muted-foreground">{calc.description}</p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-base font-bold text-foreground leading-tight">{calc.name}</h1>
+          <p className="text-[11px] text-muted-foreground">{calc.description}</p>
+        </div>
+        <button
+          onClick={() => {
+            const params = new URLSearchParams();
+            Object.entries(inputs).forEach(([k, v]) => params.set(k, v.toString()));
+            const url = `${window.location.origin}/calculator/${calc.id}?${params.toString()}`;
+            navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+          }}
+          className="flex items-center gap-0.5 text-[9px] text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-[5px] glass shrink-0"
+          title="Copiază link cu parametri"
+        >
+          <Share2 className="h-3 w-3" /> {copied ? "Copiat!" : "Partajează"}
+        </button>
       </header>
 
       <div className="grid gap-2 lg:grid-cols-2">
