@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, ChevronRight, Check, X, RotateCcw, Trophy } from "lucide-react";
+import { Brain, ChevronRight, Check, X, RotateCcw, Trophy, Share2 } from "lucide-react";
 import { mathCategories } from "@/lib/mathCalcs";
 import { generateQuiz, checkAnswer, type QuizQuestion } from "@/lib/quizEngine";
 
@@ -123,11 +123,34 @@ const QuizMode = ({ onClose }: { onClose: () => void }) => {
                 {score === questions.length ? "Perfect! 🎉" : score >= questions.length * 0.7 ? "Foarte bine! 💪" : "Mai exersează! 📚"}
               </p>
 
+              {/* Social share */}
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-[9px] text-muted-foreground">Distribuie:</span>
+                {(() => {
+                  const text = `Am obținut ${score}/${questions.length} la Quiz-ul Matematic! 🧠🎯`;
+                  const url = window.location.origin;
+                  return (
+                    <>
+                      <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:opacity-80 transition-opacity" title="Facebook">
+                        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                      </a>
+                      <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-full bg-foreground flex items-center justify-center text-background hover:opacity-80 transition-opacity" title="X (Twitter)">
+                        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      </a>
+                      <button onClick={() => { navigator.clipboard.writeText(`${text}\n${url}`); }} className="h-7 w-7 rounded-full bg-accent flex items-center justify-center text-accent-foreground hover:opacity-80 transition-opacity" title="Copiază pentru Instagram/TikTok">
+                        <Share2 className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+              <p className="text-[8px] text-muted-foreground">Instagram & TikTok: copiază textul și lipește-l în story/post</p>
+
               {/* Review answers */}
               <div className="space-y-1 text-left max-h-40 overflow-y-auto">
                 {questions.map((q, i) => (
-                  <div key={i} className={`rounded-[4px] p-1.5 text-[9px] flex items-start gap-1.5 ${q.isCorrect ? "bg-green-500/10" : "bg-destructive/10"}`}>
-                    {q.isCorrect ? <Check className="h-3 w-3 text-green-500 shrink-0 mt-0.5" /> : <X className="h-3 w-3 text-destructive shrink-0 mt-0.5" />}
+                  <div key={i} className={`rounded-[4px] p-1.5 text-[9px] flex items-start gap-1.5 ${q.isCorrect ? "bg-primary/10" : "bg-destructive/10"}`}>
+                    {q.isCorrect ? <Check className="h-3 w-3 text-primary shrink-0 mt-0.5" /> : <X className="h-3 w-3 text-destructive shrink-0 mt-0.5" />}
                     <div className="min-w-0">
                       <span className="font-medium text-foreground">{q.calc.name}</span>
                       {!q.isCorrect && (
