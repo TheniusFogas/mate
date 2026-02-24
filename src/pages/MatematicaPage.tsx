@@ -68,11 +68,11 @@ const MatematicaPage = () => {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setShowQuiz(true)}
-                className="flex items-center gap-0.5 px-2 py-1 rounded-[5px] text-[9px] font-medium transition-colors glass text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-1 px-3 py-1 rounded-[5px] text-[10px] font-semibold transition-all gradient-primary text-primary-foreground shadow-md hover:shadow-lg hover:scale-105"
                 title="Quiz matematic"
               >
-                <Brain className="h-3 w-3" />
-                <span className="hidden sm:inline">Quiz</span>
+                <Brain className="h-3.5 w-3.5" />
+                <span>Quiz</span>
               </button>
               <button
                 onClick={handleShowHistory}
