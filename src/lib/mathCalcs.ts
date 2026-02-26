@@ -1735,4 +1735,283 @@ export const mathCategories: CalcCategory[] = [
       },
     ],
   },
+  // ═══ INFORMATICĂ ═══
+  {
+    id: "informatica", name: "Informatică", description: "Baze numerice, logică booleană, complexitate algoritmică",
+    color: "hsl(280,70%,55%)",
+    calculators: [
+      {
+        id: "binar_dec", name: "Binar → Zecimal", description: "Conversie din baza 2 în baza 10",
+        formula: "Σ(bit_i × 2^i)",
+        explanation: "Fiecare cifră binară (bit) are o valoare pozițională: 2⁰=1, 2¹=2, 2²=4 etc. Se înmulțește fiecare bit cu puterea corespunzătoare a lui 2 și se însumează. Ex: 1011₂ = 1×8+0×4+1×2+1×1 = 11₁₀. Sistemul binar e fundamental în informatică — toate procesoarele operează cu biți.",
+        inputs: [{ key: "bin", label: "Număr binar (ca zecimal)", default: 1011, min: 0, max: 1111111111 }],
+        calculate: (v) => {
+          const s = Math.round(v.bin).toString();
+          let dec = 0;
+          for (let i = 0; i < s.length; i++) {
+            const bit = parseInt(s[s.length - 1 - i]);
+            if (bit !== 0 && bit !== 1) return [{ label: "Eroare", value: "Nu e binar valid" }];
+            dec += bit * Math.pow(2, i);
+          }
+          return [
+            { label: "Zecimal", value: dec.toString() },
+            { label: "Octal", value: dec.toString(8) },
+            { label: "Hexazecimal", value: dec.toString(16).toUpperCase() },
+          ];
+        },
+      },
+      {
+        id: "dec_binar", name: "Zecimal → Binar", description: "Conversie din baza 10 în baza 2",
+        formula: "Împărțiri succesive la 2, citire resturi invers",
+        explanation: "Se împarte numărul la 2 repetat, notând resturile. Citite de jos în sus, resturile formează reprezentarea binară. Ex: 13₁₀ → 13/2=6 rest 1, 6/2=3 rest 0, 3/2=1 rest 1, 1/2=0 rest 1 → 1101₂.",
+        inputs: [{ key: "dec", label: "Număr zecimal", default: 42, min: 0, max: 1048575 }],
+        calculate: (v) => {
+          const n = Math.round(v.dec);
+          return [
+            { label: "Binar", value: n.toString(2) },
+            { label: "Octal", value: n.toString(8) },
+            { label: "Hexazecimal", value: n.toString(16).toUpperCase() },
+            { label: "Nr. biți", value: n.toString(2).length.toString() },
+          ];
+        },
+      },
+      {
+        id: "ascii_conv", name: "ASCII / Unicode", description: "Cod caracter ↔ valoare numerică",
+        formula: "char = String.fromCharCode(code)",
+        explanation: "ASCII (American Standard Code for Information Interchange) atribuie valori numerice caracterelor: A=65, a=97, 0=48. Primele 32 sunt caractere de control. Extins la Unicode pentru toate alfabetele lumii. UTF-8 codifică eficient Unicode pe 1-4 octeți.",
+        inputs: [{ key: "code", label: "Cod ASCII", default: 65, min: 0, max: 65535 }],
+        calculate: (v) => {
+          const c = Math.round(v.code);
+          return [
+            { label: "Caracter", value: c >= 32 ? String.fromCharCode(c) : "(control)" },
+            { label: "Binar", value: c.toString(2).padStart(8, "0") },
+            { label: "Hex", value: "0x" + c.toString(16).toUpperCase() },
+            { label: "Octal", value: "0o" + c.toString(8) },
+          ];
+        },
+      },
+      {
+        id: "boolean_calc", name: "Porți Logice", description: "AND, OR, XOR, NOT pe biți",
+        formula: "AND: a∧b; OR: a∨b; XOR: a⊕b; NOT: ¬a",
+        explanation: "Operațiile logice booleene sunt fundamentul circuitelor digitale. AND returnează 1 doar dacă ambii biți sunt 1. OR returnează 1 dacă cel puțin un bit este 1. XOR returnează 1 dacă biții diferă. NOT inversează bitul. Se aplică în procesoare, criptografie, rețele.",
+        inputs: [
+          { key: "a", label: "Număr A", default: 12, min: 0, max: 255 },
+          { key: "b", label: "Număr B", default: 10, min: 0, max: 255 },
+        ],
+        calculate: (v) => {
+          const a = Math.round(v.a), b = Math.round(v.b);
+          return [
+            { label: "A AND B", value: `${(a & b)} (${(a & b).toString(2)})` },
+            { label: "A OR B", value: `${(a | b)} (${(a | b).toString(2)})` },
+            { label: "A XOR B", value: `${(a ^ b)} (${(a ^ b).toString(2)})` },
+            { label: "NOT A", value: `${(~a & 0xFF)} (${(~a & 0xFF).toString(2)})` },
+            { label: "NOT B", value: `${(~b & 0xFF)} (${(~b & 0xFF).toString(2)})` },
+          ];
+        },
+      },
+      {
+        id: "complexitate", name: "Complexitate Algoritmică", description: "Estimare operații pentru n elemente",
+        formula: "O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ)",
+        explanation: "Notația Big-O descrie creșterea timpului de execuție în funcție de dimensiunea input-ului. O(1) = constant, O(log n) = căutare binară, O(n) = parcurgere liniară, O(n log n) = sortare eficientă (merge sort), O(n²) = sortare simplă (bubble sort), O(2ⁿ) = backtracking exponențial.",
+        inputs: [{ key: "n", label: "n (dimensiune input)", default: 1000, min: 1, max: 1000000 }],
+        calculate: (v) => {
+          const n = Math.round(v.n);
+          return [
+            { label: "O(1)", value: "1" },
+            { label: "O(log n)", value: fmt(Math.log2(n)) },
+            { label: "O(n)", value: fmt(n) },
+            { label: "O(n log n)", value: fmt(n * Math.log2(n)) },
+            { label: "O(n²)", value: fmt(n * n) },
+            { label: "O(2ⁿ)", value: n <= 30 ? fmt(Math.pow(2, n)) : "∞" },
+          ];
+        },
+      },
+      {
+        id: "storage_conv", name: "Unități Stocare", description: "Bit → Byte → KB → MB → GB → TB",
+        formula: "1 Byte = 8 biți; 1 KB = 1024 B; 1 MB = 1024 KB",
+        explanation: "Datele sunt stocate în biți (0/1). 8 biți = 1 byte. Unitățile cresc cu factor 1024 (2¹⁰): KB, MB, GB, TB, PB. Unitățile SI (1000) vs binare (1024): 1 KB = 1024 B, dar 1 kB (SI) = 1000 B. Hard disk-urile folosesc SI, sistemele de operare folosesc binar.",
+        inputs: [{ key: "mb", label: "Megabytes", default: 1024 }],
+        calculate: (v) => [
+          { label: "Biți", value: fmt(v.mb * 1024 * 1024 * 8) },
+          { label: "Bytes", value: fmt(v.mb * 1024 * 1024) },
+          { label: "KB", value: fmt(v.mb * 1024) },
+          { label: "GB", value: fmt(v.mb / 1024) },
+          { label: "TB", value: fmt(v.mb / (1024 * 1024)) },
+        ],
+      },
+      {
+        id: "ip_subnet", name: "Subnetting IP", description: "Calculează masca, rețeaua, broadcast",
+        formula: "Adrese = 2^(32-prefix) - 2",
+        explanation: "Adresele IPv4 au 32 biți. Prefixul CIDR (/24) indică biții de rețea. Masca de rețea: primii n biți sunt 1, restul 0. Adrese utilizabile = 2^(32-n) - 2 (minus rețea și broadcast). /24 = 254 hosturi, /16 = 65534. Subnetting-ul permite segmentarea eficientă a rețelelor.",
+        inputs: [{ key: "prefix", label: "Prefix CIDR (/n)", default: 24, min: 1, max: 32, step: 1 }],
+        calculate: (v) => {
+          const p = Math.round(v.prefix);
+          const hostBits = 32 - p;
+          const totalAddrs = Math.pow(2, hostBits);
+          const mask = (0xFFFFFFFF << hostBits) >>> 0;
+          const m = [(mask >>> 24) & 0xFF, (mask >>> 16) & 0xFF, (mask >>> 8) & 0xFF, mask & 0xFF].join(".");
+          return [
+            { label: "Mască", value: m },
+            { label: "Total adrese", value: fmt(totalAddrs) },
+            { label: "Adrese utilizabile", value: fmt(Math.max(totalAddrs - 2, 0)) },
+            { label: "Biți host", value: hostBits.toString() },
+          ];
+        },
+      },
+      {
+        id: "hash_check", name: "Checksum", description: "Suma de control simplă pentru validare date",
+        formula: "checksum = Σ(bytes) mod 256",
+        explanation: "Checksum-ul verifică integritatea datelor prin însumarea valorilor și aplicarea modulo. Folosit în rețele (TCP/IP checksum), stocare, și transmisii de date. Un checksum diferit indică date corupte. Metode avansate: CRC32, MD5, SHA-256 oferă detectare mai bună a erorilor.",
+        inputs: [{ key: "num", label: "Număr", default: 123456, min: 0 }],
+        calculate: (v) => {
+          const n = Math.round(v.num);
+          const s = n.toString();
+          const digitSum = s.split("").reduce((a, d) => a + parseInt(d), 0);
+          return [
+            { label: "Suma cifrelor", value: digitSum.toString() },
+            { label: "Checksum mod 256", value: (n % 256).toString() },
+            { label: "Checksum mod 10", value: (digitSum % 10).toString() },
+            { label: "Paritate", value: n % 2 === 0 ? "Par (even)" : "Impar (odd)" },
+          ];
+        },
+      },
+    ],
+  },
+  // ═══ FIZICĂ ═══
+  {
+    id: "fizica", name: "Fizică", description: "Cinematică, forțe, energie, electricitate",
+    color: "hsl(30,80%,55%)",
+    calculators: [
+      {
+        id: "mrua", name: "Mișcare Rectilinie Uniform Accelerată", description: "Viteză, distanță, timp cu accelerație constantă",
+        formula: "v = v₀ + at; d = v₀t + ½at²; v² = v₀² + 2ad",
+        explanation: "MRUA descrie mișcarea cu accelerație constantă. Viteza crește liniar cu timpul. Distanța parcursă crește pătratic. Exemple: căderea liberă (a=9.81 m/s²), accelerarea mașinii, frânarea. Ecuațiile cinematice leagă viteza inițială, finală, accelerația, timpul și distanța.",
+        inputs: [
+          { key: "v0", label: "Viteza inițială (m/s)", default: 0, unit: "m/s" },
+          { key: "a", label: "Accelerație (m/s²)", default: 9.81, step: 0.01, unit: "m/s²" },
+          { key: "t", label: "Timp (s)", default: 5, min: 0, unit: "s" },
+        ],
+        calculate: (v) => [
+          { label: "Viteză finală", value: fmt(v.v0 + v.a * v.t) + " m/s" },
+          { label: "Distanța", value: fmt(v.v0 * v.t + 0.5 * v.a * v.t * v.t) + " m" },
+          { label: "Viteză medie", value: fmt(v.v0 + 0.5 * v.a * v.t) + " m/s" },
+        ],
+      },
+      {
+        id: "forta_newton", name: "Legea II a lui Newton", description: "Forță = masă × accelerație",
+        formula: "F = m × a",
+        explanation: "Legea a doua a lui Newton: forța rezultantă aplicată unui corp este egală cu produsul masei corpului și accelerației dobândite. F se măsoară în Newtoni (N). 1 N = forța necesară pentru a accelera 1 kg cu 1 m/s². Greutatea = m × g (g ≈ 9.81 m/s²).",
+        inputs: [
+          { key: "m", label: "Masa (kg)", default: 10, min: 0.001, unit: "kg" },
+          { key: "a", label: "Accelerație (m/s²)", default: 9.81, step: 0.01, unit: "m/s²" },
+        ],
+        calculate: (v) => [
+          { label: "Forța (N)", value: fmt(v.m * v.a) },
+          { label: "Forța (kN)", value: fmt(v.m * v.a / 1000) },
+          { label: "Greutate (kgf)", value: fmt(v.m * v.a / 9.81) },
+        ],
+      },
+      {
+        id: "energie_cinetica", name: "Energie Cinetică & Potențială", description: "Energia corpurilor în mișcare și la înălțime",
+        formula: "Ec = ½mv²; Ep = mgh; Em = Ec + Ep",
+        explanation: "Energia cinetică este energia datorată mișcării: Ec = ½mv². Energia potențială gravitațională este stocată la înălțime: Ep = mgh. Energia mecanică totală Em = Ec + Ep se conservă în absența frecării (conservarea energiei). Se măsoară în Jouli (J).",
+        inputs: [
+          { key: "m", label: "Masa (kg)", default: 5, min: 0.001, unit: "kg" },
+          { key: "v", label: "Viteza (m/s)", default: 10, unit: "m/s" },
+          { key: "h", label: "Înălțimea (m)", default: 20, unit: "m" },
+        ],
+        calculate: (v) => [
+          { label: "Ec (J)", value: fmt(0.5 * v.m * v.v * v.v) },
+          { label: "Ep (J)", value: fmt(v.m * 9.81 * v.h) },
+          { label: "Em totală (J)", value: fmt(0.5 * v.m * v.v * v.v + v.m * 9.81 * v.h) },
+          { label: "Em (kJ)", value: fmt((0.5 * v.m * v.v * v.v + v.m * 9.81 * v.h) / 1000) },
+        ],
+      },
+      {
+        id: "legea_ohm", name: "Legea lui Ohm", description: "U = I × R — tensiune, curent, rezistență",
+        formula: "U = I × R; P = U × I = I²R = U²/R",
+        explanation: "Legea lui Ohm: tensiunea (V) = curentul (A) × rezistența (Ω). Puterea electrică P (W) = U × I. Se aplică în circuite electrice, dimensionarea cablurilor, calculul consumului energetic. 1 kWh = 3.6 MJ. Rezistoarele în serie: R_total = R1+R2. În paralel: 1/R_total = 1/R1+1/R2.",
+        inputs: [
+          { key: "u", label: "Tensiune (V)", default: 220, unit: "V" },
+          { key: "r", label: "Rezistență (Ω)", default: 100, min: 0.001, unit: "Ω" },
+        ],
+        calculate: (v) => [
+          { label: "Curent (A)", value: fmt(v.u / v.r) },
+          { label: "Curent (mA)", value: fmt(v.u / v.r * 1000) },
+          { label: "Putere (W)", value: fmt(v.u * v.u / v.r) },
+          { label: "Putere (kW)", value: fmt(v.u * v.u / v.r / 1000) },
+        ],
+      },
+      {
+        id: "cadere_libera", name: "Cădere Liberă", description: "Mișcarea sub influența gravitației",
+        formula: "h = ½gt²; v = gt; t = √(2h/g)",
+        explanation: "Căderea liberă este mișcarea unui corp sub acțiunea exclusivă a gravitației (fără rezistența aerului). g ≈ 9.81 m/s² la suprafața Pământului. Galileo a demonstrat că toate corpurile cad cu aceeași accelerație, indiferent de masă. Viteza crește cu ~35 km/h pe secundă.",
+        inputs: [
+          { key: "h", label: "Înălțime (m)", default: 100, min: 0, unit: "m" },
+          { key: "g", label: "g (m/s²)", default: 9.81, step: 0.01, unit: "m/s²" },
+        ],
+        calculate: (v) => {
+          const t = Math.sqrt(2 * v.h / v.g);
+          const vf = v.g * t;
+          return [
+            { label: "Timp cădere", value: fmt(t) + " s" },
+            { label: "Viteză impact", value: fmt(vf) + " m/s" },
+            { label: "Viteză impact", value: fmt(vf * 3.6) + " km/h" },
+            { label: "Ec impact (1kg)", value: fmt(v.g * v.h) + " J" },
+          ];
+        },
+      },
+      {
+        id: "lucru_mecanic", name: "Lucru Mecanic & Putere", description: "L = F × d × cos(α); P = L/t",
+        formula: "L = F·d·cos(α); P = L/t",
+        explanation: "Lucrul mecanic măsoară transferul de energie printr-o forță pe o distanță. L = F × d × cos(α), unde α e unghiul dintre forță și direcția deplasării. Puterea P = L/t măsoară rata de lucru. 1 W = 1 J/s. 1 cal putere (HP) = 745.7 W. Se aplică în mecanică, motoare, pompe.",
+        inputs: [
+          { key: "f", label: "Forța (N)", default: 100, unit: "N" },
+          { key: "d", label: "Distanța (m)", default: 50, unit: "m" },
+          { key: "alpha", label: "Unghi α (°)", default: 0, min: 0, max: 90, unit: "°" },
+          { key: "t", label: "Timp (s)", default: 10, min: 0.01, unit: "s" },
+        ],
+        calculate: (v) => {
+          const rad = v.alpha * Math.PI / 180;
+          const L = v.f * v.d * Math.cos(rad);
+          const P = L / v.t;
+          return [
+            { label: "Lucru (J)", value: fmt(L) },
+            { label: "Lucru (kJ)", value: fmt(L / 1000) },
+            { label: "Putere (W)", value: fmt(P) },
+            { label: "Putere (HP)", value: fmt(P / 745.7) },
+          ];
+        },
+      },
+      {
+        id: "densitate", name: "Densitate", description: "ρ = m/V — masă, volum, densitate",
+        formula: "ρ = m/V; m = ρ×V; V = m/ρ",
+        explanation: "Densitatea (ρ) este masa pe unitate de volum. Apa: 1000 kg/m³, aer: 1.225 kg/m³, fier: 7874 kg/m³, aur: 19300 kg/m³. Un corp plutește dacă ρ < ρ_lichid. Se măsoară în kg/m³ sau g/cm³. Densitatea depinde de temperatură și presiune (mai ales la gaze).",
+        inputs: [
+          { key: "m", label: "Masa (kg)", default: 5, min: 0.001, unit: "kg" },
+          { key: "vol", label: "Volumul (m³)", default: 0.005, min: 0.000001, step: 0.001, unit: "m³" },
+        ],
+        calculate: (v) => [
+          { label: "Densitate (kg/m³)", value: fmt(v.m / v.vol) },
+          { label: "Densitate (g/cm³)", value: fmt(v.m / v.vol / 1000) },
+          { label: "Plutește în apă?", value: v.m / v.vol < 1000 ? "Da ✓" : "Nu ✗" },
+        ],
+      },
+      {
+        id: "presiune", name: "Presiune", description: "P = F/S — forță pe suprafață",
+        formula: "P = F/S; P_hidro = ρgh",
+        explanation: "Presiunea este forța pe unitate de suprafață: P = F/S. Se măsoară în Pascal (Pa) = N/m². 1 atm = 101325 Pa = 1013.25 hPa = 760 mmHg. Presiunea hidrostatică crește cu adâncimea: P = ρgh. La fiecare 10m de apă, presiunea crește cu ~1 atm.",
+        inputs: [
+          { key: "f", label: "Forța (N)", default: 1000, unit: "N" },
+          { key: "s", label: "Suprafața (m²)", default: 0.01, min: 0.0001, step: 0.01, unit: "m²" },
+        ],
+        calculate: (v) => [
+          { label: "Presiune (Pa)", value: fmt(v.f / v.s) },
+          { label: "Presiune (kPa)", value: fmt(v.f / v.s / 1000) },
+          { label: "Presiune (atm)", value: fmt(v.f / v.s / 101325) },
+          { label: "Presiune (bar)", value: fmt(v.f / v.s / 100000) },
+        ],
+      },
+    ],
+  },
 ];
