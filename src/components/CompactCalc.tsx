@@ -6,11 +6,13 @@ import type { CalcConfig } from "@/lib/calcTypes";
 import { getAdsForPosition, getReferralsForZone } from "@/lib/adminStore";
 import { getVizType } from "@/lib/vizConfig";
 import { isExamMode, subscribeExamMode, addToHistory, exportCalcPDF } from "@/lib/calcFeatures";
+import { useI18n } from "@/lib/i18n";
 
 const Viz3D = lazy(() => import("./Viz3D"));
 const Viz2D = lazy(() => import("./Viz2D"));
 
 const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
+  const { t, tCalcName, tCalcDesc, tLabel, tInputLabel } = useI18n();
   const [open, setOpen] = useState(false);
   const [showFormula, setShowFormula] = useState(false);
   const [showViz, setShowViz] = useState(false);
@@ -36,14 +38,14 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
   const referrals = useMemo(() => getReferralsForZone(calc.id), [calc.id]);
 
   const handleSaveHistory = () => {
-    addToHistory({ calcName: calc.name, calcId: calc.id, inputs, results });
+    addToHistory({ calcName: tCalcName(calc.id, calc.name), calcId: calc.id, inputs, results });
   };
 
   const handleExportPDF = () => {
     exportCalcPDF(
-      calc.name, calc.formula, calc.explanation,
-      calc.inputs.map(i => ({ label: i.label, value: inputs[i.key], unit: i.unit })),
-      results
+      tCalcName(calc.id, calc.name), calc.formula, calc.explanation,
+      calc.inputs.map(i => ({ label: tInputLabel(i.label), value: inputs[i.key], unit: i.unit })),
+      results.map(r => ({ label: tLabel(r.label), value: r.value }))
     );
   };
 
@@ -57,30 +59,25 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
     });
   };
 
+  const name = tCalcName(calc.id, calc.name);
+  const desc = tCalcDesc(calc.id, calc.description);
+
   return (
     <div className="glass rounded-[5px] overflow-hidden shadow-card hover:shadow-card-hover transition-shadow">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-left hover:bg-secondary/30 transition-colors"
       >
-        <motion.div
-          animate={{ rotate: open ? 90 : 0 }}
-          transition={{ duration: 0.15 }}
-          className="shrink-0"
-        >
+        <motion.div animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.15 }} className="shrink-0">
           <ChevronRight className="h-2.5 w-2.5 text-muted-foreground" />
         </motion.div>
         <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-semibold text-foreground leading-tight block truncate">{calc.name}</span>
-          <span className="text-[9px] text-muted-foreground/70 leading-tight block truncate">{calc.description}</span>
+          <span className="text-[11px] font-semibold text-foreground leading-tight block truncate">{name}</span>
+          <span className="text-[9px] text-muted-foreground/70 leading-tight block truncate">{desc}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {hasViz && <Eye className="h-2.5 w-2.5 text-primary/40" />}
-          <Link
-            to={`/calculator/${calc.id}`}
-            onClick={e => e.stopPropagation()}
-            className="text-muted-foreground/40 hover:text-primary transition-colors"
-          >
+          <Link to={`/calculator/${calc.id}`} onClick={e => e.stopPropagation()} className="text-muted-foreground/40 hover:text-primary transition-colors">
             <ExternalLink className="h-2.5 w-2.5" />
           </Link>
         </div>
@@ -88,24 +85,16 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
 
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2, ease: "easeInOut" }} className="overflow-hidden">
             <div className="px-2 pb-2 space-y-1.5 border-t border-border/30">
               {/* Inputs */}
               <div className="grid grid-cols-2 gap-1 pt-1.5">
                 {calc.inputs.map(input => (
                   <div key={input.key}>
                     <label className="text-[8px] font-medium text-muted-foreground uppercase tracking-wider leading-none block mb-0.5">
-                      {input.label}{input.unit && ` (${input.unit})`}
+                      {tInputLabel(input.label)}{input.unit && ` (${input.unit})`}
                     </label>
-                    <input
-                      type="number"
-                      value={inputs[input.key]}
+                    <input type="number" value={inputs[input.key]}
                       onChange={e => setInputs(prev => ({ ...prev, [input.key]: parseFloat(e.target.value) || 0 }))}
                       min={input.min} max={input.max} step={input.step || 1}
                       className="w-full h-5 rounded-[4px] border border-input bg-secondary/60 px-1 text-[10px] font-mono outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-colors [&::-webkit-inner-spin-button]:appearance-auto [&::-webkit-inner-spin-button]:opacity-100"
@@ -115,30 +104,26 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
               </div>
 
               {/* Results */}
-              <motion.div
-                key={JSON.stringify(results)}
-                initial={{ opacity: 0.5 }}
-                animate={{ opacity: 1 }}
-                className="rounded-[4px] bg-primary/5 border border-primary/10 p-1.5 space-y-0.5"
-              >
+              <motion.div key={JSON.stringify(results)} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }}
+                className="rounded-[4px] bg-primary/5 border border-primary/10 p-1.5 space-y-0.5">
                 {results.map((r, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-1">
-                    <span className="text-[9px] text-muted-foreground truncate">{r.label}</span>
-                    <span className="text-[10px] font-mono font-semibold text-foreground whitespace-nowrap">{r.value}</span>
+                    <span className="text-[9px] text-muted-foreground truncate">{tLabel(r.label)}</span>
+                    <span className="text-[10px] font-mono font-semibold text-foreground whitespace-nowrap">{tLabel(r.value)}</span>
                   </div>
                 ))}
               </motion.div>
 
-              {/* Action buttons */}
+              {/* Actions */}
               <div className="flex items-center gap-1">
-                <button onClick={handleSaveHistory} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Salvează în istoric">
-                  <Save className="h-2.5 w-2.5" /> Salvează
+                <button onClick={handleSaveHistory} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title={t("calc.save")}>
+                  <Save className="h-2.5 w-2.5" /> {t("calc.save")}
                 </button>
-                <button onClick={handleExportPDF} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Export PDF">
-                  <Download className="h-2.5 w-2.5" /> PDF
+                <button onClick={handleExportPDF} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title={t("calc.pdf")}>
+                  <Download className="h-2.5 w-2.5" /> {t("calc.pdf")}
                 </button>
-                <button onClick={handleShare} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title="Copiază link cu parametri">
-                  <Share2 className="h-2.5 w-2.5" /> {copied ? "Copiat!" : "Link"}
+                <button onClick={handleShare} className="flex items-center gap-0.5 text-[8px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-secondary/40 hover:bg-secondary/80" title={t("calc.link")}>
+                  <Share2 className="h-2.5 w-2.5" /> {copied ? t("calc.copied") : t("calc.link")}
                 </button>
               </div>
 
@@ -147,7 +132,7 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
                 <>
                   <button onClick={() => setShowViz(!showViz)} className="flex items-center gap-1 text-[9px] text-primary hover:underline font-medium">
                     <Eye className="h-2.5 w-2.5" />
-                    {showViz ? "Ascunde" : `Vizualizare ${vizType === '3d' ? '3D' : '2D'}`}
+                    {showViz ? t("calc.hideViz") : (vizType === '3d' ? t("calc.viz3d") : t("calc.viz2d"))}
                   </button>
                   <AnimatePresence>
                     {showViz && (
@@ -161,12 +146,12 @@ const CompactCalc = ({ calc }: { calc: CalcConfig }) => {
                 </>
               )}
 
-              {/* Formula - hidden in exam mode */}
+              {/* Formula */}
               {!examModeOn && (
                 <>
                   <button onClick={() => setShowFormula(!showFormula)} className="flex items-center gap-1 text-[9px] text-primary hover:underline">
                     <BookOpen className="h-2.5 w-2.5" />
-                    {showFormula ? "Ascunde" : "Formulă & explicație"}
+                    {showFormula ? t("calc.hideFormula") : t("calc.formulaBtn")}
                   </button>
                   <AnimatePresence>
                     {showFormula && (

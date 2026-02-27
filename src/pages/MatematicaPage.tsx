@@ -1,5 +1,5 @@
-import { useState, useMemo, lazy, Suspense } from "react";
-import { Search, Brain } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Layout from "@/components/Layout";
 import CompactCalc from "@/components/CompactCalc";
@@ -8,14 +8,11 @@ import { getAdsForPosition } from "@/lib/adminStore";
 import { isExamMode, toggleExamMode } from "@/lib/calcFeatures";
 import { useI18n } from "@/lib/i18n";
 
-const QuizMode = lazy(() => import("@/components/QuizMode"));
-
 const MatematicaPage = () => {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [examOn, setExamOn] = useState(isExamMode);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const { t, tCatName, tCatDesc } = useI18n();
+  const { t, tCatName, tCatDesc, tCalcName, tCalcDesc } = useI18n();
 
   const totalCalcs = mathCategories.reduce((s, c) => s + c.calculators.length, 0);
 
@@ -25,12 +22,15 @@ const MatematicaPage = () => {
       .filter(cat => !activeCategory || cat.id === activeCategory)
       .map(cat => ({
         ...cat,
-        calculators: cat.calculators.filter(
-          c => !q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q) || c.formula.toLowerCase().includes(q)
-        ),
+        calculators: cat.calculators.filter(c => {
+          if (!q) return true;
+          const name = tCalcName(c.id, c.name).toLowerCase();
+          const desc = tCalcDesc(c.id, c.description).toLowerCase();
+          return name.includes(q) || desc.includes(q) || c.formula.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
+        }),
       }))
       .filter(cat => cat.calculators.length > 0);
-  }, [search, activeCategory]);
+  }, [search, activeCategory, tCalcName, tCalcDesc]);
 
   const shownCount = filtered.reduce((s, c) => s + c.calculators.length, 0);
   const headerAds = useMemo(() => getAdsForPosition('header'), []);
@@ -45,19 +45,9 @@ const MatematicaPage = () => {
 
         {/* Hero */}
         <header className="mb-2">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h1 className="font-display text-sm font-bold text-foreground leading-none">{t("home.title")}</h1>
-              <p className="text-[9px] text-muted-foreground">{totalCalcs} {t("home.subtitle")}</p>
-            </div>
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="flex items-center gap-1 px-3 py-1 rounded-[5px] text-[10px] font-semibold transition-all gradient-primary text-primary-foreground shadow-md hover:shadow-lg hover:scale-105"
-              title="Quiz"
-            >
-              <Brain className="h-3.5 w-3.5" />
-              <span>Quiz</span>
-            </button>
+          <div>
+            <h1 className="font-display text-sm font-bold text-foreground leading-none">{t("home.title")}</h1>
+            <p className="text-[9px] text-muted-foreground">{totalCalcs} {t("home.subtitle")}</p>
           </div>
         </header>
 
@@ -128,15 +118,6 @@ const MatematicaPage = () => {
             <p className="text-[11px] text-muted-foreground">{t("home.noResults")} „{search}".</p>
           </div>
         )}
-
-        {/* Quiz Modal */}
-        <AnimatePresence>
-          {showQuiz && (
-            <Suspense fallback={null}>
-              <QuizMode onClose={() => setShowQuiz(false)} />
-            </Suspense>
-          )}
-        </AnimatePresence>
       </div>
     </Layout>
   );
