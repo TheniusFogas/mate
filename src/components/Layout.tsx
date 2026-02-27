@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Settings, Sun, Moon, Crown, History, GraduationCap, ChevronDown } from "lucide-react";
+import { Menu, X, Settings, Sun, Moon, Crown, History, GraduationCap, Brain, ChevronDown } from "lucide-react";
 import { useState, useEffect, lazy, Suspense } from "react";
 import mathLogo from "@/assets/math-logo.png";
 import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
@@ -7,6 +7,8 @@ import { isExamMode, toggleExamMode, getHistory, clearHistory, type HistoryEntry
 import { getScores, clearScores } from "@/lib/quizScores";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Share2 } from "lucide-react";
+
+const QuizMode = lazy(() => import("@/components/QuizMode"));
 
 const getTheme = (): "light" | "dark" => {
   if (typeof window === "undefined") return "dark";
@@ -22,6 +24,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [langOpen, setLangOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const [examOn, setExamOn] = useState(isExamMode);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const { lang, setLang, t } = useI18n();
@@ -32,13 +35,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
-
   const handleToggleExam = () => { toggleExamMode(); setExamOn(isExamMode()); };
   const handleShowHistory = () => { setHistory(getHistory()); setShowHistory(true); };
   const handleClearHistory = () => { clearHistory(); setHistory([]); };
 
   const currentFlag = LANGUAGES.find(l => l.code === lang)?.flag || "🇷🇴";
-
   const scores = getScores();
   const diffLabels: Record<string, string> = { easy: t("quiz.easy"), medium: t("quiz.medium"), hard: t("quiz.hard") };
   const diffColors: Record<string, string> = { easy: "text-success", medium: "text-warning", hard: "text-destructive" };
@@ -53,6 +54,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex">
+            <button onClick={() => setShowQuiz(true)}
+              className="rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-1">
+              <Brain className="h-3 w-3" /> {t("nav.quiz")}
+            </button>
             <button onClick={() => setShowLeaderboard(true)}
               className="rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-1">
               <Crown className="h-3 w-3" /> {t("nav.leaderboard")}
@@ -94,14 +99,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               title={theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}>
               {theme === "dark" ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
             </button>
-            <Link to="/admin"
-              className="rounded-[5px] px-1.5 py-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
+            <Link to="/admin" className="rounded-[5px] px-1.5 py-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
               <Settings className="h-3 w-3" />
             </Link>
           </nav>
 
           <div className="flex items-center gap-1 md:hidden">
-            {/* Mobile language */}
             <div className="relative">
               <button onClick={() => setLangOpen(!langOpen)}
                 className="flex h-6 w-6 items-center justify-center rounded-[5px] text-foreground hover:bg-secondary text-[11px]">
@@ -121,8 +124,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </>
               )}
             </div>
-            <button onClick={toggleTheme}
-              className="flex h-6 w-6 items-center justify-center rounded-[5px] text-foreground hover:bg-secondary">
+            <button onClick={toggleTheme} className="flex h-6 w-6 items-center justify-center rounded-[5px] text-foreground hover:bg-secondary">
               {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
             </button>
             <button className="flex h-6 w-6 items-center justify-center rounded-[5px] text-foreground hover:bg-secondary"
@@ -134,6 +136,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
         {menuOpen && (
           <div className="border-t border-border/50 px-3 py-1.5 md:hidden glass">
+            <button onClick={() => { setShowQuiz(true); setMenuOpen(false); }}
+              className="flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-secondary hover:text-foreground w-full">
+              <Brain className="h-3 w-3" /> {t("nav.quiz")}
+            </button>
             <button onClick={() => { setShowLeaderboard(true); setMenuOpen(false); }}
               className="flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-secondary hover:text-foreground w-full">
               <Crown className="h-3 w-3" /> {t("nav.leaderboard")}
@@ -250,6 +256,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Quiz Modal */}
+      <AnimatePresence>
+        {showQuiz && (
+          <Suspense fallback={null}>
+            <QuizMode onClose={() => setShowQuiz(false)} />
+          </Suspense>
         )}
       </AnimatePresence>
     </div>

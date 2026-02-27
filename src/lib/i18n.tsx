@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { getCalcName, getCalcDesc, getCatName, getCatDesc, translateLabel, translateInputLabel } from "./calcTranslations";
 
 export type Lang = "ro" | "en" | "fr" | "de" | "it" | "es";
 
@@ -16,12 +17,13 @@ const UI: Record<string, Record<Lang, string>> = {
   "nav.leaderboard": { ro: "Clasament", en: "Leaderboard", fr: "Classement", de: "Rangliste", it: "Classifica", es: "Clasificación" },
   "nav.history": { ro: "Istoric", en: "History", fr: "Historique", de: "Verlauf", it: "Cronologia", es: "Historial" },
   "nav.exam": { ro: "Examen", en: "Exam", fr: "Examen", de: "Prüfung", it: "Esame", es: "Examen" },
+  "nav.quiz": { ro: "Quiz", en: "Quiz", fr: "Quiz", de: "Quiz", it: "Quiz", es: "Quiz" },
   "nav.admin": { ro: "Admin", en: "Admin", fr: "Admin", de: "Admin", it: "Admin", es: "Admin" },
   "nav.lightMode": { ro: "Mod luminos", en: "Light mode", fr: "Mode clair", de: "Hellmodus", it: "Modalità chiara", es: "Modo claro" },
   "nav.darkMode": { ro: "Mod întunecat", en: "Dark mode", fr: "Mode sombre", de: "Dunkelmodus", it: "Modalità scura", es: "Modo oscuro" },
 
-  // Home
-  "home.title": { ro: "Calculatoare Matematică", en: "Math Calculators", fr: "Calculatrices Mathématiques", de: "Mathematik-Rechner", it: "Calcolatrici Matematiche", es: "Calculadoras Matemáticas" },
+  // Home / Page
+  "home.title": { ro: "Calculatoare Științifice", en: "Scientific Calculators", fr: "Calculatrices Scientifiques", de: "Wissenschaftliche Rechner", it: "Calcolatrici Scientifiche", es: "Calculadoras Científicas" },
   "home.subtitle": { ro: "instrumente • vizualizări interactive • formule detaliate", en: "tools • interactive visualizations • detailed formulas", fr: "outils • visualisations interactives • formules détaillées", de: "Werkzeuge • interaktive Visualisierungen • detaillierte Formeln", it: "strumenti • visualizzazioni interattive • formule dettagliate", es: "herramientas • visualizaciones interactivas • fórmulas detalladas" },
   "home.all": { ro: "Toate", en: "All", fr: "Toutes", de: "Alle", it: "Tutte", es: "Todas" },
   "home.search": { ro: "Caută calculator, formulă...", en: "Search calculator, formula...", fr: "Chercher calculatrice, formule...", de: "Rechner, Formel suchen...", it: "Cerca calcolatrice, formula...", es: "Buscar calculadora, fórmula..." },
@@ -29,6 +31,17 @@ const UI: Record<string, Record<Lang, string>> = {
   "home.result": { ro: "rezultat", en: "result", fr: "résultat", de: "Ergebnis", it: "risultato", es: "resultado" },
   "home.for": { ro: "pentru", en: "for", fr: "pour", de: "für", it: "per", es: "para" },
   "home.noResults": { ro: "Niciun calculator găsit pentru", en: "No calculator found for", fr: "Aucune calculatrice trouvée pour", de: "Kein Rechner gefunden für", it: "Nessuna calcolatrice trovata per", es: "No se encontró calculadora para" },
+
+  // Index page
+  "index.hero": { ro: "Calculatoare Online", en: "Online Calculators", fr: "Calculatrices en Ligne", de: "Online-Rechner", it: "Calcolatrici Online", es: "Calculadoras en Línea" },
+  "index.heroDesc": { ro: "Instrumente gratuite pentru matematică, fizică, informatică și viața de zi cu zi — rapide, precise și ușor de folosit.", en: "Free tools for math, physics, computer science and everyday life — fast, accurate and easy to use.", fr: "Outils gratuits pour les mathématiques, la physique, l'informatique et la vie quotidienne — rapides, précis et faciles à utiliser.", de: "Kostenlose Werkzeuge für Mathematik, Physik, Informatik und den Alltag — schnell, präzise und einfach zu bedienen.", it: "Strumenti gratuiti per matematica, fisica, informatica e la vita quotidiana — veloci, precisi e facili da usare.", es: "Herramientas gratuitas para matemáticas, física, informática y la vida diaria — rápidas, precisas y fáciles de usar." },
+  "index.catScience": { ro: "Matematică, Fizică & Informatică", en: "Math, Physics & Computer Science", fr: "Maths, Physique & Informatique", de: "Mathe, Physik & Informatik", it: "Matematica, Fisica & Informatica", es: "Matemáticas, Física e Informática" },
+  "index.catScienceDesc": { ro: "Algebră, geometrie, trigonometrie, analiză, fizică, baze numerice — cu vizualizări interactive", en: "Algebra, geometry, trigonometry, analysis, physics, number bases — with interactive visualizations", fr: "Algèbre, géométrie, trigonométrie, analyse, physique, bases numériques — avec visualisations interactives", de: "Algebra, Geometrie, Trigonometrie, Analysis, Physik, Zahlensysteme — mit interaktiven Visualisierungen", it: "Algebra, geometria, trigonometria, analisi, fisica, basi numeriche — con visualizzazioni interattive", es: "Álgebra, geometría, trigonometría, análisis, física, bases numéricas — con visualizaciones interactivas" },
+  "index.catHome": { ro: "Casă & Renovări", en: "Home & Renovations", fr: "Maison & Rénovations", de: "Haus & Renovierungen", it: "Casa & Ristrutturazioni", es: "Hogar & Renovaciones" },
+  "index.catHomeDesc": { ro: "Suprafețe camere, vopsea, pardoseală — cu estimări avansate de cost", en: "Room surfaces, paint, flooring — with advanced cost estimates", fr: "Surfaces de pièces, peinture, parquet — avec estimations de coûts avancées", de: "Raumflächen, Farbe, Bodenbelag — mit erweiterten Kostenschätzungen", it: "Superfici stanze, vernice, pavimentazione — con stime di costo avanzate", es: "Superficies de habitaciones, pintura, pisos — con estimaciones de costos avanzadas" },
+  "index.catHealth": { ro: "Sănătate", en: "Health", fr: "Santé", de: "Gesundheit", it: "Salute", es: "Salud" },
+  "index.catHealthDesc": { ro: "IMC, calorii, hidratare, cost fumat — monitorizează-ți sănătatea", en: "BMI, calories, hydration, smoking cost — monitor your health", fr: "IMC, calories, hydratation, coût du tabac — surveillez votre santé", de: "BMI, Kalorien, Hydration, Rauchkosten — überwachen Sie Ihre Gesundheit", it: "IMC, calorie, idratazione, costo fumo — monitora la tua salute", es: "IMC, calorías, hidratación, costo de fumar — monitorea tu salud" },
+  "index.calcCount": { ro: "calculatoare", en: "calculators", fr: "calculatrices", de: "Rechner", it: "calcolatrici", es: "calculadoras" },
 
   // Quiz
   "quiz.title": { ro: "Quiz Matematic", en: "Math Quiz", fr: "Quiz Mathématique", de: "Mathe-Quiz", it: "Quiz Matematico", es: "Quiz Matemático" },
@@ -85,41 +98,18 @@ const UI: Record<string, Record<Lang, string>> = {
   "exam.disable": { ro: "Dezactivează", en: "Disable", fr: "Désactiver", de: "Deaktivieren", it: "Disattiva", es: "Desactivar" },
 
   // Footer
-  "footer.text": { ro: "© 2026 MathLab — Calculatoare matematică online gratuite", en: "© 2026 MathLab — Free online math calculators", fr: "© 2026 MathLab — Calculatrices mathématiques en ligne gratuites", de: "© 2026 MathLab — Kostenlose Online-Mathematikrechner", it: "© 2026 MathLab — Calcolatrici matematiche online gratuite", es: "© 2026 MathLab — Calculadoras matemáticas en línea gratuitas" },
+  "footer.text": { ro: "© 2026 MathLab — Calculatoare online gratuite", en: "© 2026 MathLab — Free online calculators", fr: "© 2026 MathLab — Calculatrices en ligne gratuites", de: "© 2026 MathLab — Kostenlose Online-Rechner", it: "© 2026 MathLab — Calcolatrici online gratuite", es: "© 2026 MathLab — Calculadoras en línea gratuitas" },
 
   // Calculator UI
   "calc.save": { ro: "Salvează", en: "Save", fr: "Sauver", de: "Speichern", it: "Salva", es: "Guardar" },
   "calc.pdf": { ro: "PDF", en: "PDF", fr: "PDF", de: "PDF", it: "PDF", es: "PDF" },
-  "calc.share": { ro: "Share", en: "Share", fr: "Partager", de: "Teilen", it: "Condividi", es: "Compartir" },
-  "calc.formula": { ro: "Formulă", en: "Formula", fr: "Formule", de: "Formel", it: "Formula", es: "Fórmula" },
-  "calc.explanation": { ro: "Explicație", en: "Explanation", fr: "Explication", de: "Erklärung", it: "Spiegazione", es: "Explicación" },
+  "calc.link": { ro: "Link", en: "Link", fr: "Lien", de: "Link", it: "Link", es: "Enlace" },
   "calc.copied": { ro: "Copiat!", en: "Copied!", fr: "Copié !", de: "Kopiert!", it: "Copiato!", es: "¡Copiado!" },
-
-  // Categories
-  "cat.aritmetica": { ro: "Aritmetică", en: "Arithmetic", fr: "Arithmétique", de: "Arithmetik", it: "Aritmetica", es: "Aritmética" },
-  "cat.algebra": { ro: "Algebră", en: "Algebra", fr: "Algèbre", de: "Algebra", it: "Algebra", es: "Álgebra" },
-  "cat.geometrie2d": { ro: "Geometrie 2D", en: "2D Geometry", fr: "Géométrie 2D", de: "2D-Geometrie", it: "Geometria 2D", es: "Geometría 2D" },
-  "cat.geometrie3d": { ro: "Geometrie 3D", en: "3D Geometry", fr: "Géométrie 3D", de: "3D-Geometrie", it: "Geometria 3D", es: "Geometría 3D" },
-  "cat.trigonometrie": { ro: "Trigonometrie", en: "Trigonometry", fr: "Trigonométrie", de: "Trigonometrie", it: "Trigonometria", es: "Trigonometría" },
-  "cat.analiza": { ro: "Analiză", en: "Analysis", fr: "Analyse", de: "Analysis", it: "Analisi", es: "Análisis" },
-  "cat.combinatorica": { ro: "Combinatorică & Statistică", en: "Combinatorics & Statistics", fr: "Combinatoire & Statistiques", de: "Kombinatorik & Statistik", it: "Combinatoria & Statistica", es: "Combinatoria & Estadística" },
-  "cat.conversii": { ro: "Conversii", en: "Conversions", fr: "Conversions", de: "Umrechnungen", it: "Conversioni", es: "Conversiones" },
-  "cat.informatica": { ro: "Informatică", en: "Computer Science", fr: "Informatique", de: "Informatik", it: "Informatica", es: "Informática" },
-  "cat.fizica": { ro: "Fizică", en: "Physics", fr: "Physique", de: "Physik", it: "Fisica", es: "Física" },
-};
-
-// Category description translations
-const CAT_DESC: Record<string, Record<Lang, string>> = {
-  "aritmetica": { ro: "Operații fundamentale, procente, fracții, factorizare", en: "Basic operations, percentages, fractions, factorization", fr: "Opérations fondamentales, pourcentages, fractions", de: "Grundoperationen, Prozente, Brüche, Faktorisierung", it: "Operazioni fondamentali, percentuali, frazioni", es: "Operaciones fundamentales, porcentajes, fracciones" },
-  "algebra": { ro: "Ecuații, sisteme, progresii, logaritmi", en: "Equations, systems, progressions, logarithms", fr: "Équations, systèmes, progressions, logarithmes", de: "Gleichungen, Systeme, Progressionen, Logarithmen", it: "Equazioni, sistemi, progressioni, logaritmi", es: "Ecuaciones, sistemas, progresiones, logaritmos" },
-  "geometrie2d": { ro: "Arii, perimetre, poligoane, cerc", en: "Areas, perimeters, polygons, circle", fr: "Aires, périmètres, polygones, cercle", de: "Flächen, Umfänge, Polygone, Kreis", it: "Aree, perimetri, poligoni, cerchio", es: "Áreas, perímetros, polígonos, círculo" },
-  "geometrie3d": { ro: "Volume, suprafețe, corpuri geometrice", en: "Volumes, surfaces, geometric solids", fr: "Volumes, surfaces, solides géométriques", de: "Volumen, Oberflächen, geometrische Körper", it: "Volumi, superfici, solidi geometrici", es: "Volúmenes, superficies, sólidos geométricos" },
-  "trigonometrie": { ro: "Funcții trigonometrice, identități, triunghi", en: "Trigonometric functions, identities, triangle", fr: "Fonctions trigonométriques, identités, triangle", de: "Trigonometrische Funktionen, Identitäten, Dreieck", it: "Funzioni trigonometriche, identità, triangolo", es: "Funciones trigonométricas, identidades, triángulo" },
-  "analiza": { ro: "Limite, derivate, integrale", en: "Limits, derivatives, integrals", fr: "Limites, dérivées, intégrales", de: "Grenzwerte, Ableitungen, Integrale", it: "Limiti, derivate, integrali", es: "Límites, derivadas, integrales" },
-  "combinatorica": { ro: "Permutări, combinări, medie, mediană, dispersie", en: "Permutations, combinations, mean, median, variance", fr: "Permutations, combinaisons, moyenne, médiane", de: "Permutationen, Kombinationen, Mittelwert, Median", it: "Permutazioni, combinazioni, media, mediana", es: "Permutaciones, combinaciones, media, mediana" },
-  "conversii": { ro: "Unități de măsură, baze numerice, temperatură", en: "Units of measurement, number bases, temperature", fr: "Unités de mesure, bases numériques, température", de: "Maßeinheiten, Zahlensysteme, Temperatur", it: "Unità di misura, basi numeriche, temperatura", es: "Unidades de medida, bases numéricas, temperatura" },
-  "informatica": { ro: "Baze numerice, logică booleană, complexitate algoritmică", en: "Number bases, boolean logic, algorithmic complexity", fr: "Bases numériques, logique booléenne, complexité algorithmique", de: "Zahlensysteme, Boolesche Logik, algorithmische Komplexität", it: "Basi numeriche, logica booleana, complessità algoritmica", es: "Bases numéricas, lógica booleana, complejidad algorítmica" },
-  "fizica": { ro: "Cinematică, forțe, energie, electricitate", en: "Kinematics, forces, energy, electricity", fr: "Cinématique, forces, énergie, électricité", de: "Kinematik, Kräfte, Energie, Elektrizität", it: "Cinematica, forze, energia, elettricità", es: "Cinemática, fuerzas, energía, electricidad" },
+  "calc.formulaBtn": { ro: "Formulă & explicație", en: "Formula & explanation", fr: "Formule & explication", de: "Formel & Erklärung", it: "Formula & spiegazione", es: "Fórmula & explicación" },
+  "calc.hideFormula": { ro: "Ascunde", en: "Hide", fr: "Masquer", de: "Ausblenden", it: "Nascondi", es: "Ocultar" },
+  "calc.viz2d": { ro: "Vizualizare 2D", en: "2D Visualization", fr: "Visualisation 2D", de: "2D-Visualisierung", it: "Visualizzazione 2D", es: "Visualización 2D" },
+  "calc.viz3d": { ro: "Vizualizare 3D", en: "3D Visualization", fr: "Visualisation 3D", de: "3D-Visualisierung", it: "Visualizzazione 3D", es: "Visualización 3D" },
+  "calc.hideViz": { ro: "Ascunde", en: "Hide", fr: "Masquer", de: "Ausblenden", it: "Nascondi", es: "Ocultar" },
 };
 
 const getLang = (): Lang => {
@@ -135,6 +125,10 @@ interface I18nCtx {
   t: (key: string) => string;
   tCatName: (catId: string) => string;
   tCatDesc: (catId: string) => string;
+  tCalcName: (calcId: string, fallback: string) => string;
+  tCalcDesc: (calcId: string, fallback: string) => string;
+  tLabel: (roText: string) => string;
+  tInputLabel: (roText: string) => string;
 }
 
 const I18nContext = createContext<I18nCtx>({
@@ -143,6 +137,10 @@ const I18nContext = createContext<I18nCtx>({
   t: (k) => k,
   tCatName: (id) => id,
   tCatDesc: (id) => id,
+  tCalcName: (_, fb) => fb,
+  tCalcDesc: (_, fb) => fb,
+  tLabel: (t) => t,
+  tInputLabel: (t) => t,
 });
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
@@ -158,14 +156,15 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
   }, [lang]);
 
   const t = (key: string): string => UI[key]?.[lang] || UI[key]?.["ro"] || key;
-  const tCatName = (catId: string): string => {
-    const key = `cat.${catId}`;
-    return UI[key]?.[lang] || UI[key]?.["ro"] || catId;
-  };
-  const tCatDesc = (catId: string): string => CAT_DESC[catId]?.[lang] || CAT_DESC[catId]?.["ro"] || "";
+  const tCatName = (catId: string): string => getCatName(catId, lang, catId);
+  const tCatDesc = (catId: string): string => getCatDesc(catId, lang, "");
+  const tCalcNameFn = (calcId: string, fallback: string): string => getCalcName(calcId, lang, fallback);
+  const tCalcDescFn = (calcId: string, fallback: string): string => getCalcDesc(calcId, lang, fallback);
+  const tLabelFn = (roText: string): string => translateLabel(roText, lang);
+  const tInputLabelFn = (roText: string): string => translateInputLabel(roText, lang);
 
   return (
-    <I18nContext.Provider value={{ lang, setLang, t, tCatName, tCatDesc }}>
+    <I18nContext.Provider value={{ lang, setLang, t, tCatName, tCatDesc, tCalcName: tCalcNameFn, tCalcDesc: tCalcDescFn, tLabel: tLabelFn, tInputLabel: tInputLabelFn }}>
       {children}
     </I18nContext.Provider>
   );

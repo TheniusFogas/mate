@@ -2,38 +2,42 @@ import { Link } from "react-router-dom";
 import { Calculator, Home, Heart, ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-
-const categories = [
-  {
-    to: "/matematica",
-    title: "Matematică",
-    description: "Arii, volume, perimetre — cu forme vizuale interactive și calcule instant",
-    icon: Calculator,
-    gradient: "gradient-math",
-    count: "28 calculatoare",
-  },
-  {
-    to: "/casa",
-    title: "Casă & Renovări",
-    description: "Suprafețe camere, vopsea, pardoseală — cu estimări avansate de cost",
-    icon: Home,
-    gradient: "gradient-home",
-    count: "3 calculatoare",
-  },
-  {
-    to: "/sanatate",
-    title: "Sănătate",
-    description: "IMC, calorii, hidratare, cost fumat — monitorizează-ți sănătatea",
-    icon: Heart,
-    gradient: "gradient-health",
-    count: "4 calculatoare",
-  },
-];
+import { useI18n } from "@/lib/i18n";
+import { mathCategories } from "@/lib/mathCalcs";
 
 const Index = () => {
+  const { t } = useI18n();
+  const totalCalcs = mathCategories.reduce((s, c) => s + c.calculators.length, 0);
+
+  const categories = [
+    {
+      to: "/matematica",
+      title: t("index.catScience"),
+      description: t("index.catScienceDesc"),
+      icon: Calculator,
+      gradient: "gradient-math",
+      count: `${totalCalcs} ${t("index.calcCount")}`,
+    },
+    {
+      to: "/casa",
+      title: t("index.catHome"),
+      description: t("index.catHomeDesc"),
+      icon: Home,
+      gradient: "gradient-home",
+      count: `3 ${t("index.calcCount")}`,
+    },
+    {
+      to: "/sanatate",
+      title: t("index.catHealth"),
+      description: t("index.catHealthDesc"),
+      icon: Heart,
+      gradient: "gradient-health",
+      count: `4 ${t("index.calcCount")}`,
+    },
+  ];
+
   return (
     <Layout>
-      {/* Hero */}
       <section className="relative overflow-hidden gradient-hero py-20 md:py-28">
         <div className="absolute inset-0 opacity-10">
           <svg className="h-full w-full" viewBox="0 0 800 400">
@@ -45,41 +49,25 @@ const Index = () => {
             ))}
           </svg>
         </div>
-
         <div className="container relative mx-auto px-4 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="font-display text-4xl font-bold tracking-tight text-primary-foreground md:text-6xl"
-          >
-            Calculatoare Online
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+            className="font-display text-4xl font-bold tracking-tight text-primary-foreground md:text-6xl">
+            {t("index.hero")}
           </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mx-auto mt-4 max-w-lg text-lg text-primary-foreground/70"
-          >
-            Instrumente gratuite pentru matematică, casă și sănătate — rapide, precise și ușor de folosit.
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
+            className="mx-auto mt-4 max-w-lg text-lg text-primary-foreground/70">
+            {t("index.heroDesc")}
           </motion.p>
         </div>
       </section>
 
-      {/* Categories */}
       <section className="container mx-auto px-4 -mt-12 relative z-10 pb-8">
         <div className="grid gap-6 md:grid-cols-3">
           {categories.map((cat, i) => (
-            <motion.div
-              key={cat.to}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
-            >
-              <Link
-                to={cat.to}
-                className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-elevated hover:-translate-y-1"
-              >
+            <motion.div key={cat.to} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}>
+              <Link to={cat.to}
+                className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-elevated hover:-translate-y-1">
                 <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${cat.gradient}`}>
                   <cat.icon className="h-6 w-6 text-primary-foreground" />
                 </div>
